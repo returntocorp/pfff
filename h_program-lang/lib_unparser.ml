@@ -147,7 +147,7 @@ let elts_of_add_args_before acc xs =
   | Esthet2 (Newline, _) ->
       (* new line for each argument *)
       let acc = add_if_need_comma "," [] acc in
-      let sep = xs |> List.map (fun s ->
+      let sep = xs |> Ls.map (fun s ->
         "  " ^ s ^ ",\n" ^ String.make ws ' ') in
       let add_str = join "" sep in
       (Added add_str)::acc
@@ -247,7 +247,7 @@ let drop_whole_line_if_only_removed xs =
   )
   in
   before_first_newline @
-  (xxs |> List.map (fun (elt, elts) -> elt::elts) |> List.flatten)
+  (xxs |> Ls.map (fun (elt, elts) -> elt::elts) |> Ls.flatten)
 
 (* people often write s/foo(X,Y)/.../ but some calls to foo may have
  * a trailing comma that we also want to remove automatically

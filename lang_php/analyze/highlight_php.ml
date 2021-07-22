@@ -53,7 +53,7 @@ let place_ids current_file ids db =
         else PlaceExternal
   | x::y::xs ->
       let other_files =
-        List.map (fun id -> "TODO" (* DbPHP.filename_of_id id db *)) ids
+        Ls.map (fun id -> "TODO" (* DbPHP.filename_of_id id db *)) ids
         +> Common2.uniq
       in
       if List.mem current_file other_files
@@ -82,7 +82,7 @@ let arity_of_number nbuses =
 let use_arity_ident_function_or_macro s db =
   let ids = (* DbPHP.function_ids__of_string s db *) [] in
   let nbuses =
-    ids +> List.map (fun id ->
+    ids +> Ls.map (fun id ->
       try
         let callers = (* db.DbPHP.uses.DbPHP.callers_of_f#assoc id in*) [] in
         List.length callers

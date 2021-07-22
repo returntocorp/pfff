@@ -501,7 +501,7 @@ let str_of_info_fake_ok ii =
   | Ab -> raise (NoTokenLocation "Ab")
 
 let combine_infos x xs =
-  let str = xs |> List.map str_of_info_fake_ok |> String.concat "" in
+  let str = xs |> Ls.map str_of_info_fake_ok |> String.concat "" in
   tok_add_s str x
 
 let split_info_at_pos pos ii =

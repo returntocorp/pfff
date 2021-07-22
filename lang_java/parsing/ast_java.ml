@@ -532,10 +532,10 @@ let info_of_ident ident =
   snd ident
 
 let is_final xs =
-  let xs = List.map fst xs in
+  let xs = Ls.map fst xs in
   List.mem Final xs
 let is_final_static xs =
-  let xs = List.map fst xs in
+  let xs = Ls.map fst xs in
   List.mem Final xs && List.mem Static xs
 
 let rec info_of_identifier_ (id : identifier_) : tok = match id with
@@ -582,13 +582,13 @@ let decls f = fun mods vtype vars ->
   let dcl (v, init) =
     f { f_var = canon_var mods (Some vtype) v; f_init = init }
   in
-  List.map dcl vars
+  Ls.map dcl vars
 
 let constructor_invocation name args sc =
   Expr (Call ((name), args), sc)
 
 let typ_of_qualified_id xs =
-  TClass (xs |> List.map (fun id -> id, None))
+  TClass (xs |> Ls.map (fun id -> id, None))
 
 let name_of_id id =
   (*Name ([[], id]) *)

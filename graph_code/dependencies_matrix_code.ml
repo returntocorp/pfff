@@ -69,10 +69,10 @@ and config = tree
 
 let basic_config g =
   Node (G.root, Graph_code.children G.root g
-                |> List.map (fun n -> Node (n, [])))
+                |> Ls.map (fun n -> Node (n, [])))
 let basic_config_opti gopti =
   Node (G.root, Graph_code_opti.children G.root gopti
-                |> List.map (fun n -> Node (n, [])))
+                |> Ls.map (fun n -> Node (n, [])))
 
 type config_path_elem =
   | Expand of Graph_code.node
@@ -123,7 +123,7 @@ let rec final_nodes_of_tree tree =
   | Node (n, xs) ->
       if null xs
       then [n]
-      else List.map final_nodes_of_tree xs |> List.flatten
+      else Ls.map final_nodes_of_tree xs |> Ls.flatten
 
 let hashtbl_find_node h n =
   try Hashtbl.find h n
@@ -221,8 +221,8 @@ let expand_node n tree g =
         then
           (* less: assert null xs? *)
           let succ = G.succ n G.Has g in
-          Node (n2, succ |> List.map (fun n -> Node (n, [])))
-        else Node (n2, xs |> List.map aux)
+          Node (n2, succ |> Ls.map (fun n -> Node (n, [])))
+        else Node (n2, xs |> Ls.map aux)
   in
   aux tree
 
@@ -234,8 +234,8 @@ let expand_node_opti n tree g =
         then
           (* less: assert null xs? *)
           let succ = Graph_code_opti.children n g in
-          Node (n2, succ |> List.map (fun n -> Node (n, [])))
-        else Node (n2, xs |> List.map aux)
+          Node (n2, succ |> Ls.map (fun n -> Node (n, [])))
+        else Node (n2, xs |> Ls.map aux)
   in
   aux tree
 
@@ -265,7 +265,7 @@ let focus_on_node n deps_style tree dm =
     then Common.push j deps
   done;
   (* old: this was not keeping the hierarchy (which can be a feature)
-   *  Node (G.root, !deps +> List.rev +> List.map (fun i ->
+   *  Node (G.root, !deps +> List.rev +> Ls.map (fun i ->
    *    Node (hashtbl_find_node dm.i_to_name i, []))
    *  )
   *)
@@ -302,7 +302,7 @@ let string_of_config_path_elem = function
         (G.string_of_node n)
 
 let string_of_config_path xs =
-  xs |> List.map string_of_config_path_elem |> Common.join "/"
+  xs |> Ls.map string_of_config_path_elem |> Common.join "/"
 
 (*****************************************************************************)
 (* Matrix analysis *)
@@ -380,7 +380,7 @@ let is_internal_helper j dm =
 
 let score_upper_triangle dm exclude_nodes =
   let score = ref 0 in
-  let exclude_idx = exclude_nodes |> List.map (fun n ->
+  let exclude_idx = exclude_nodes |> Ls.map (fun n ->
     hashtbl_find_node dm.name_to_i n) in
 
   for i = 0 to Array.length dm.matrix -1 do
@@ -394,7 +394,7 @@ let score_upper_triangle dm exclude_nodes =
 
 let score_downer_triangle dm exclude_nodes =
   let score = ref 0 in
-  let exclude_idx = exclude_nodes |> List.map (fun n ->
+  let exclude_idx = exclude_nodes |> Ls.map (fun n ->
     hashtbl_find_node dm.name_to_i n) in
 
   for i = 0 to Array.length dm.matrix -1 do

@@ -833,7 +833,7 @@ let noQscope = []
 (* Wrappers *)
 (*****************************************************************************)
 let unwrap x = fst x
-let uncomma xs = Common.map fst xs
+let uncomma xs = Ls.map fst xs
 let unparen (_, x, _) = x
 let unbrace (_, x, _) = x
 

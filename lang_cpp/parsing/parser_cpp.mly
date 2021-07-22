@@ -1346,7 +1346,7 @@ field_declaration:
      }
  | decl_spec_seq listc(member_declarator) ";"
      { let (t_ret, sto, _inline) = type_and_storage_from_decl $1 in
-       ($2 |> (List.map (fun (f, iivirg) -> f t_ret sto, iivirg)), $3)
+       ($2 |> (Ls.map (fun (f, iivirg) -> f t_ret sto, iivirg)), $3)
      }
 
 (* was called struct_declarator before *)
@@ -1418,7 +1418,7 @@ simple_declaration:
  | decl_spec_seq listc(init_declarator) ";"
      { let (t_ret, sto, _inline) = type_and_storage_from_decl $1 in
        DeclList (
-         ($2 |> List.map (fun (((name, f), iniopt), iivirg) ->
+         ($2 |> Ls.map (fun (((name, f), iniopt), iivirg) ->
            (* old: if fst (unwrap storage)=StoTypedef then LP.add_typedef s; *)
            { v_namei = Some (name, iniopt);
              v_type = f t_ret; v_storage = sto

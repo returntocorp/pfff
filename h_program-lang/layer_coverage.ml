@@ -42,7 +42,7 @@ let gen_red_green_layer lines_coverage =
   { Layer_code.
     title = "Test coverage (red/green)";
     description = "Use information from xdebug";
-    files = lines_coverage |> List.map (fun (file, lines_cover) ->
+    files = lines_coverage |> Ls.map (fun (file, lines_cover) ->
       let covered = lines_cover.Coverage_code.covered_sites in
       let all = lines_cover.Coverage_code.all_sites in
       let not_covered = Common2.minus_set all covered in
@@ -55,8 +55,8 @@ let gen_red_green_layer lines_coverage =
       file,
       { Layer_code.
         micro_level =
-          (covered |> List.map (fun line -> line, "ok")) @
-          (not_covered |> List.map (fun line -> line, "bad"))
+          (covered |> Ls.map (fun line -> line, "ok")) @
+          (not_covered |> Ls.map (fun line -> line, "bad"))
         ;
         macro_level = [
           (match percent with
@@ -78,7 +78,7 @@ let gen_heatmap_layer lines_coverage =
   { Layer_code.
     title = "Test coverage (heatmap)";
     description = "Use information from xdebug";
-    files = lines_coverage |> List.map (fun (file, lines_cover) ->
+    files = lines_coverage |> Ls.map (fun (file, lines_cover) ->
       let covered = lines_cover.Coverage_code.covered_sites in
       let all = lines_cover.Coverage_code.all_sites in
       let not_covered = Common2.minus_set all covered in
@@ -92,8 +92,8 @@ let gen_heatmap_layer lines_coverage =
       file,
       { Layer_code.
         micro_level =
-          (covered |> List.map (fun line -> line, "ok")) @
-          (not_covered |> List.map (fun line -> line, "bad"))
+          (covered |> Ls.map (fun line -> line, "ok")) @
+          (not_covered |> Ls.map (fun line -> line, "bad"))
         ;
         macro_level = [
           (let percent_round = (percent / 10) * 10 in

@@ -85,28 +85,28 @@ let fix_sgrep_module_item xs =
 
 let mk_Fun ?(id=None) ?(attrs=[]) ?(props=[])
   f_kind (_generics,(_,f_params,_),f_rettype) (lc,xs,rc) =
-  let f_attrs = (props |> List.map attr) @ attrs in
+  let f_attrs = (props |> Ls.map attr) @ attrs in
   Fun ({ f_kind; f_params; f_body = Block (lc, xs, rc); f_rettype; f_attrs }, id)
 
 let mk_FuncDef props f_kind (_generics,(_,f_params,_),f_rettype) (lc,xs,rc) =
-  let f_attrs = props |> List.map attr in
+  let f_attrs = props |> Ls.map attr in
   FuncDef { f_kind; f_params; f_body = Block (lc, xs, rc); f_rettype; f_attrs }
 
 let mk_Class ?(props=[]) tok idopt _generics (c_extends, c_implements) c_body =
-  let c_attrs = props |> List.map attr in
+  let c_attrs = props |> Ls.map attr in
   Class ({c_kind = H.Class, tok; c_extends; c_implements; c_attrs; c_body},
          idopt)
 
 let mk_ClassDef ?(attrs=[]) ?(props=[]) tok _generics (c_extends, c_implements) c_body =
-  let c_attrs = (props |> List.map attr) @ attrs in
+  let c_attrs = (props |> Ls.map attr) @ attrs in
   ClassDef ({c_kind = H.Class, tok; c_extends; c_implements; c_attrs; c_body})
 
 let mk_Field ?(fld_type=None) ?(props=[]) fld_name eopt =
-  let fld_attrs = props |> List.map attr in
+  let fld_attrs = props |> Ls.map attr in
   Field { fld_name; fld_attrs; fld_type; fld_body = eopt }
 
 let mk_FieldColon ?(fld_type=None) ?(props=[]) fld_name eopt =
-  let fld_attrs = props |> List.map attr in
+  let fld_attrs = props |> Ls.map attr in
   FieldColon { fld_name; fld_attrs; fld_type; fld_body = eopt }
 
 let add_modifiers _propsTODO fld =
@@ -348,7 +348,7 @@ optl(X):
 
 main: program EOF { $1 }
 
-program: module_item* { List.flatten $1 }
+program: module_item* { Ls.flatten $1 }
 
 (* parse item by item, to allow error recovery and skipping some code *)
 module_item_or_eof:
@@ -357,13 +357,13 @@ module_item_or_eof:
 
 module_item:
  | item        { $1 }
- | import_decl { $1 |> List.map (fun x -> M x) }
+ | import_decl { $1 |> Ls.map (fun x -> M x) }
  | export_decl { $1 }
 
 (* item is also in stmt_list, inside every blocks *)
 item:
  | stmt { $1 }
- | decl { $1 |> List.map (fun v -> DefStmt v) }
+ | decl { $1 |> Ls.map (fun v -> DefStmt v) }
 
 decl:
  (* part of hoistable_declaration in the ECMA grammar *)
@@ -420,7 +420,7 @@ sgrep_spatch_pattern:
 
  | assignment_expr_no_stmt  EOF  { Expr $1 }
  | module_item              EOF  { fix_sgrep_module_item $1 }
- | module_item module_item+ EOF  { Stmts (List.flatten ($1::$2)) }
+ | module_item module_item+ EOF  { Stmts (Ls.flatten ($1::$2)) }
 
  | T_FUNCTION "..." call_signature "{" function_body "}"
    { match mk_FuncDef [] (Function, $1) $3 ($4, $5, $6) with
@@ -480,7 +480,7 @@ import_names:
  | "*" T_AS binding_id
      { (fun t path -> [ModuleAlias (t, $3, path)]) }
  | named_imports
-     { (fun t path -> $1 |> List.map (fun (n1, n2opt) ->
+     { (fun t path -> $1 |> Ls.map (fun (n1, n2opt) ->
           Import (t, n1, n2opt, path)))
      }
  (* typing-ext: *)
@@ -517,10 +517,10 @@ export_decl:
  | T_EXPORT variable_stmt
     { vars_to_stmts $2 (*$1, ExportDecl (St $2)*) }
  | T_EXPORT decl
-    { $2 |> List.map (fun v -> DefStmt v) (*$1, ExportDecl $2*) }
+    { $2 |> Ls.map (fun v -> DefStmt v) (*$1, ExportDecl $2*) }
  (* in theory just func/gen/class, no lexical_decl *)
  | T_EXPORT T_DEFAULT decl
-    { $3 |> List.map (fun v -> DefStmt v) (* $1, ExportDefaultDecl ($2, $3) *) }
+    { $3 |> Ls.map (fun v -> DefStmt v) (* $1, ExportDefaultDecl ($2, $3) *) }
  | T_EXPORT T_DEFAULT assignment_expr_no_stmt sc
     { [] (* $1, ExportDefaultExpr ($2, $3, $4) *)  }
  (* ugly hack because should use assignment_expr above instead*)
@@ -740,7 +740,7 @@ async_function_expr: T_ASYNC T_FUNCTION id? call_signature "{"function_body"}"
 class_decl: decorators T_CLASS binding_id? generics? class_heritage class_body
    { $3, mk_ClassDef ~attrs:$1 $2 $4 $5 $6 }
 
-class_body: "{" class_element* "}" { ($1, List.flatten $2, $3) }
+class_body: "{" class_element* "}" { ($1, Ls.flatten $2, $3) }
 
 class_heritage: extends_clause? optl(implements_clause)
   { Common.opt_to_list $1, $2 }
@@ -827,7 +827,7 @@ interface_decl: T_INTERFACE binding_id generics? optl(interface_extends)
       c_body = (t1, [], t2) } }
 
 interface_extends: T_EXTENDS listc(type_reference)
-  { $2 |> List.map (fun t -> Right t) }
+  { $2 |> Ls.map (fun t -> Right t) }
 
 (*************************************************************************)
 (* Type declaration *)
@@ -908,7 +908,7 @@ primary_type2:
  | object_type
     { let (t1, _xsTODO, t2) = $1 in
       TyRecordAnon ((t1, (), t2)) }
- | "[" listc(type_) "]" { let members = List.map (fun x -> TyTupMember x) $2 in
+ | "[" listc(type_) "]" { let members = Ls.map (fun x -> TyTupMember x) $2 in
                           TyTuple ($1, members, $3) }
  (* not in Typescript grammar *)
  | T_STRING
@@ -1091,7 +1091,7 @@ stmt1: stmt { stmt1 $1 }
 
 block: "{" optl(stmt_list) "}" { Block ($1, $2, $3) }
 
-stmt_list: item+ { List.flatten $1 }
+stmt_list: item+ { Ls.flatten $1 }
 
 empty_stmt: sc { Block ($1, [], $1) }
 

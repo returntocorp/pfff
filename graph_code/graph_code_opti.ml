@@ -104,7 +104,7 @@ let convert a =
 
 let children n g =
   g.has_children.(hashtbl_find g.name_to_i n)
-  |> List.map (fun i ->
+  |> Ls.map (fun i ->
     g.i_to_name.(i)
   )
 
@@ -115,9 +115,9 @@ let all_children n g =
     let xs = g.has_children.(i) in
     if null xs
     then [i]
-    else i::(xs |> List.map (fun i -> aux i) |> List.flatten)
+    else i::(xs |> Ls.map (fun i -> aux i) |> Ls.flatten)
   in
-  aux (hashtbl_find g.name_to_i n) |> List.map (fun i -> g.i_to_name.(i))
+  aux (hashtbl_find g.name_to_i n) |> Ls.map (fun i -> g.i_to_name.(i))
 
 
 let has_node n g =
@@ -138,7 +138,7 @@ let adjust_graph_pack_some_children_under_dotdotdot parent to_pack g =
   then failwith (spf "already a node with '%s' for a name" dotdotdot);
 
   let new_idx = Array.length g.i_to_name in
-  let to_pack_idx = to_pack |> List.map (fun n -> hashtbl_find g.name_to_i n)in
+  let to_pack_idx = to_pack |> Ls.map (fun n -> hashtbl_find g.name_to_i n)in
   let new_g = {
     name_to_i = Hashtbl.copy g.name_to_i;
     i_to_name = Array.append g.i_to_name [|new_node|];

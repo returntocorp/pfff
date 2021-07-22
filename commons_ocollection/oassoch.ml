@@ -34,6 +34,6 @@ class ['a,'b] oassoch xs =
     method delkey k = (Hashtbl.remove data k; o)
 
     method keys =
-      List.map fst (o#tolist)
+      Ls.map fst (o#tolist)
 
   end

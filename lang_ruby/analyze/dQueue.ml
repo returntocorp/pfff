@@ -45,7 +45,7 @@ let length (f,r) = (List.length f) + (List.length r)
 
 let append (f1,r1) (f2,r2) =
   let r = List.rev_append f2 r1 in
-  let r = List.append r2 r in
+  let r = Ls.append r2 r in
   queue f1 r
 
 let rev (f,r) = queue r f
@@ -77,11 +77,11 @@ let rec flatten t =
 (*
 let flatten (f,r) =
   let f'= List.fold_left
-    (fun acc (x,y) -> List.append x (List.rev_append y acc)) [] f
+    (fun acc (x,y) -> Ls.append x (List.rev_append y acc)) [] f
   in
   let r' = List.fold_left
     (fun acc (f,r) ->
-      List.append acc (List.append r (List.rev f))
+      Ls.append acc (Ls.append r (List.rev f))
     ) [] r
   in
     f',r'

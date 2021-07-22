@@ -127,7 +127,7 @@ let bracket_keep of_a (t1, x, t2) = (t1, of_a x, t2)
 
 let rec program xs =
   let env = empty_env () in
-  toplevels env xs |> List.flatten
+  toplevels env xs |> Ls.flatten
 
 (* ---------------------------------------------------------------------- *)
 (* Toplevels *)
@@ -135,12 +135,12 @@ let rec program xs =
 
 and toplevels env xs =
   ifdef_skipper xs (function IfdefDecl x -> Some x | _ -> None)
-  |> List.map (toplevel env)
+  |> Ls.map (toplevel env)
 
 and toplevel env x =
   match x with
   | DeclElem decl ->
-      declaration env decl |> List.map (fun x -> A.DefStmt x)
+      declaration env decl |> Ls.map (fun x -> A.DefStmt x)
   | CppDirectiveDecl x ->
       [A.DirStmt (cpp_directive env x)]
 
@@ -173,10 +173,10 @@ and declaration env x =
            env.struct_defs_toadd <- [];
            env.enum_defs_toadd <- [];
            env.typedefs_toadd <- [];
-           (structs |> List.map (fun x -> A.StructDef x)) @
-           (enums |> List.map (fun x -> A.EnumDef x)) @
-           (typedefs |> List.map (fun x -> A.TypeDef x)) @
-           (xs |> List.map (fun x ->
+           (structs |> Ls.map (fun x -> A.StructDef x)) @
+           (enums |> Ls.map (fun x -> A.EnumDef x)) @
+           (typedefs |> Ls.map (fun x -> A.TypeDef x)) @
+           (xs |> Ls.map (fun x ->
               (* could skip extern declaration? *)
               match x with
               | { A.v_type = A.TFunction ft; v_storage = storage; _ } ->
@@ -231,7 +231,7 @@ and function_type env x =
       );
 
       (full_type env ret,
-       List.map (parameter env) (params |> unparen |> uncomma)
+       Ls.map (parameter env) (params |> unparen |> uncomma)
       )
 
 and parameter env x =
@@ -309,7 +309,7 @@ and initialiser env x =
        | [] -> debug (Init x); raise Impossible
        | (InitDesignators ([DesignatorField (_, _)], _, _init))::_ ->
            A.RecordInit (bracket_keep (fun xs ->
-             xs |> uncomma |> List.map (function
+             xs |> uncomma |> Ls.map (function
                | InitDesignators ([DesignatorField (_, ident)], _, init) ->
                    ident, initialiser env init
                | _ -> debug (Init x); raise Todo
@@ -353,7 +353,7 @@ and cpp_directive env x =
            A.Define (tok, name, v)
        | DefineFunc(args) ->
            A.Macro(tok, name,
-                   args |> unparen |> uncomma |> List.map (fun (s, ii) ->
+                   args |> unparen |> uncomma |> Ls.map (fun (s, ii) ->
                      (s, ii)
                    ),
                    v)
@@ -457,11 +457,11 @@ and stmt env st =
       debug (Stmt st); raise Todo
 
 and compound env (t1, xs, t2) =
-  t1, (statements_sequencable env xs |> List.flatten), t2
+  t1, (statements_sequencable env xs |> Ls.flatten), t2
 
 and statements_sequencable env xs =
   ifdef_skipper xs (function IfdefStmt x -> Some x | _ -> None)
-  |> List.map (statement_sequencable env)
+  |> Ls.map (statement_sequencable env)
 
 
 and statement_sequencable env x =
@@ -488,7 +488,7 @@ and cases env st =
                      | _ -> true
                    )
                  in
-                 let stmts = List.map (function
+                 let stmts = Ls.map (function
                    | StmtElem st -> stmt env st
                    | x ->
                        debug (Stmt (Compound (l, [x], r)));
@@ -682,7 +682,7 @@ and full_type env x =
            let def' = { A.
                         s_name = name;
                         s_kind = struct_kind env kind;
-                        s_flds = (t1, class_members_sequencable env xs |> List.flatten, t2);
+                        s_flds = (t1, class_members_sequencable env xs |> Ls.flatten, t2);
                       }
            in
            env.struct_defs_toadd <- def' :: env.struct_defs_toadd;
@@ -700,7 +700,7 @@ and full_type env x =
         | Some n -> n
       in
       let xs' =
-        xs |> unbrace |> uncomma |> List.map (fun eelem ->
+        xs |> unbrace |> uncomma |> Ls.map (fun eelem ->
           let (name, e_opt) = eelem.e_name, eelem.e_val in
           name,
           match e_opt with
@@ -726,7 +726,7 @@ and class_member env x =
   match x with
   | MemberField (fldkind, _) ->
       let xs = uncomma fldkind in
-      xs |> List.map (fieldkind env)
+      xs |> Ls.map (fieldkind env)
   | ( UsingDeclInClass _| TemplateDeclInClass _
     | QualifiedIdInClass (_, _)| MemberDecl _| MemberFunc _| Access (_, _)
     ) ->
@@ -736,7 +736,7 @@ and class_member env x =
 
 and class_members_sequencable env xs =
   ifdef_skipper xs (function IfdefStruct x -> Some x | _ -> None)
-  |> List.map (class_member_sequencable env)
+  |> Ls.map (class_member_sequencable env)
 
 and class_member_sequencable env x =
   match x with
@@ -798,13 +798,13 @@ let any any =
   match any with
   | Expr x -> A.Expr (expr env x)
   | Stmt x -> A.Stmt (stmt env x)
-  | Stmts xs -> A.Stmts (List.map (stmt env) xs)
+  | Stmts xs -> A.Stmts (Ls.map (stmt env) xs)
   | Toplevel x ->
       (match toplevel env x with
        | [x] -> A.Stmt x
        | xs -> A.Stmts xs
       )
-  | Toplevels xs -> A.Stmts (List.map (toplevel env) xs |> List.flatten)
+  | Toplevels xs -> A.Stmts (Ls.map (toplevel env) xs |> Ls.flatten)
 
   | (Program _|Cpp _|Type _|Name _|BlockDecl2 _|ClassDef _|FuncDef _|
      FuncOrElse _|ClassMember _|OneDecl _|Init _|Constant _|Argument _|

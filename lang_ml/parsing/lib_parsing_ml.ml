@@ -54,7 +54,7 @@ let find_cmt_files_of_dir_or_files xs =
       let (d,b,e) = Common2.dbe_of_filename file in
       Hashtbl.add hfiles (d,b) e
     );
-    Common2.hkeys hfiles |> List.map (fun (d,b) ->
+    Common2.hkeys hfiles |> Ls.map (fun (d,b) ->
       let xs = Hashtbl.find_all hfiles (d,b) in
       (match xs with
        | ["cmt";"cmti"]

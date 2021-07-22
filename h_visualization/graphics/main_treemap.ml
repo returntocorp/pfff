@@ -96,7 +96,7 @@ let options () =
       algorithm := Treemap.algo_of_s s;
     ),
     (spf " <algo> (choices are: %s, default = %s"
-       (Treemap.algos |> List.map Treemap.s_of_algo |> Common.join ", ")
+       (Treemap.algos |> Ls.map Treemap.s_of_algo |> Common.join ", ")
        (Treemap.s_of_algo !algorithm));
 
     "-big_screen", Arg.Set big_screen,

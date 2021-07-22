@@ -35,7 +35,7 @@ let unittest =
         (match tags with
         | [file, tags_in_file] ->
             assert_equal tmpfile file;
-            let xs = tags_in_file +> List.map (fun x ->
+            let xs = tags_in_file +> Ls.map (fun x ->
               x.Tags_file.tagname, x.Tags_file.kind
             ) in
             assert_equal ~msg:"it should contain the right 6 entries" [

@@ -31,4 +31,4 @@ let rec vof_multi_grouped =
   | Tok v1 -> let v1 = vof_wrap v1 in OCaml.VSum ("Tok", [ v1 ])
 and vof_wrap (s, _x) = OCaml.VString s
 and vof_trees xs =
-  OCaml.VList (xs |> List.map vof_multi_grouped)
+  OCaml.VList (xs |> Ls.map vof_multi_grouped)

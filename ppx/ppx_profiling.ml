@@ -104,7 +104,7 @@ let module_name_of_filename s =
  * nested modules.
 *)
 let impl xs =
-  xs |> List.map (fun item ->
+  xs |> Ls.map (fun item ->
     match item with
     (* let <fname> = ... [@@profiling <args_opt> *)
     | { pstr_desc =
@@ -160,7 +160,7 @@ let impl xs =
         in
         [ item; item2]
     | x -> [x]
-  ) |> List.concat
+  ) |> Ls.concat
 (*****************************************************************************)
 (* Entry point *)
 (*****************************************************************************)

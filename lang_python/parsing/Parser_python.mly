@@ -61,9 +61,9 @@ let rec set_expr_ctx ctx = function
       Subscript (value, slice, ctx)
 
   | List (CompList (t1, elts, t2), _) ->
-      List (CompList ((t1, List.map (set_expr_ctx ctx) elts, t2)), ctx)
+      List (CompList ((t1, Ls.map (set_expr_ctx ctx) elts, t2)), ctx)
   | Tuple (CompList (t1, elts, t2), _) ->
-      Tuple (CompList ((t1, List.map (set_expr_ctx ctx) elts, t2)), ctx)
+      Tuple (CompList ((t1, Ls.map (set_expr_ctx ctx) elts, t2)), ctx)
 
   | e -> e
 
@@ -222,7 +222,7 @@ main:
   *)
  | file_input INDENT NEWLINE DEDENT NEWLINE EOF { $1 }
 
-file_input: nl_or_stmt* { List.flatten $1 }
+file_input: nl_or_stmt* { Ls.flatten $1 }
 
 nl_or_stmt:
  | NEWLINE { [] }
@@ -235,7 +235,7 @@ sgrep_spatch_pattern:
    | [x] -> Stmt x
    | xs -> Stmts xs
  }
- | stmt stmt+ NEWLINE? EOF { Stmts ($1 @ (List.flatten $2)) }
+ | stmt stmt+ NEWLINE? EOF { Stmts ($1 @ (Ls.flatten $2)) }
 
 (*************************************************************************)
 (* Import *)
@@ -247,7 +247,7 @@ import_stmt:
 
 
 import_name: IMPORT list_sep(dotted_as_name, ",")
-  { $2 |> List.map (fun (v1, v2) -> let dots = None in
+  { $2 |> Ls.map (fun (v1, v2) -> let dots = None in
          ImportAs ($1, (v1, dots), v2))   }
 
 dotted_as_name:
@@ -499,7 +499,7 @@ exec_stmt:
   | EXEC expr IN test "," test { Exec ($1, $2, Some $4, Some $6) }
 
 
-del_stmt: DEL exprlist { Delete ($1, List.map expr_del (to_list $2)) }
+del_stmt: DEL exprlist { Delete ($1, Ls.map expr_del (to_list $2)) }
 
 pass_stmt: PASS { Pass $1 }
 
@@ -576,7 +576,7 @@ decorated:
 (* this is always preceded by a ":" *)
 suite:
   | simple_stmt { $1 }
-  | NEWLINE INDENT stmt* DEDENT { List.flatten $3 }
+  | NEWLINE INDENT stmt* DEDENT { Ls.flatten $3 }
 
 
 if_stmt: IF namedexpr_test ":" suite elif_stmt_list { If ($1, $2, $4, $5) }

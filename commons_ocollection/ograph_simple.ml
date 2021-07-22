@@ -105,7 +105,7 @@ class ['key, 'a,'b] ograph_mutable =
         else
           let acc = acc#add x in
           let prefs = o#predecessors x in
-          let prefs = prefs#tolist |> List.map fst in
+          let prefs = prefs#tolist |> Ls.map fst in
           prefs |> List.fold_left (fun acc x -> aux acc x) acc
       in
       let set = aux empty_set k in

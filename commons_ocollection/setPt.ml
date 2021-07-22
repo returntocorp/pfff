@@ -325,7 +325,7 @@ let equal = (=)
 let compare = compare
 
 (*i*)
-let make l = List.fold_right add l empty
+let make l = Ls.fold_right add l empty
 (*i*)
 
 (*s Additional functions w.r.t to [Set.S]. *)

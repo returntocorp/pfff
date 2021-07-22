@@ -319,7 +319,7 @@ listc2(X): list_sep2(X, ",") { $1 }
 (*************************************************************************)
 (* Toplevel *)
 (*************************************************************************)
-main: top_statement* EOF { List.flatten $1 @ [FinalDef $2] }
+main: top_statement* EOF { Ls.flatten $1 @ [FinalDef $2] }
 
 top_statement:
  | statement                  { [TopStmt $1] }
@@ -335,7 +335,7 @@ top_statement:
 sgrep_spatch_pattern:
  | expr                         EOF { Expr $1 }
  | top_statement                EOF { mk_Toplevel $1 }
- | top_statement top_statement+ EOF { Toplevels ($1 @ List.flatten $2) }
+ | top_statement top_statement+ EOF { Toplevels ($1 @ Ls.flatten $2) }
  | ":" type_php                 EOF { Hint2 $2 }
 
  (* partials *)
@@ -618,7 +618,7 @@ is_reference: TAND?  { $1 }
 lexical_vars:
  | (*empty*)  { None }
  | T_USE "(" non_empty_lexical_var_list ")" {
-     Some ($1, ($2, ($3 |> List.map (function
+     Some ($1, ($2, ($3 |> Ls.map (function
      | Right info -> Right info
      | Left (a,b) -> Left (LexicalVar (a,b)))), $4))
    }
@@ -1334,9 +1334,9 @@ namespace_declaration:
  | T_NAMESPACE namespace_name ";"
      { NamespaceDef ($1, $2, $3) }
  | T_NAMESPACE namespace_name "{" top_statement* "}"
-     { NamespaceBracketDef ($1, Some $2, ($3, List.flatten $4, $5)) }
+     { NamespaceBracketDef ($1, Some $2, ($3, Ls.flatten $4, $5)) }
  | T_NAMESPACE                "{" top_statement* "}"
-     { NamespaceBracketDef ($1, None, ($2, List.flatten $3, $4)) }
+     { NamespaceBracketDef ($1, None, ($2, Ls.flatten $3, $4)) }
 
 namespace_use_declaration:
  | T_USE use_keyword? listc(namespace_use_clause) ";"
@@ -1345,7 +1345,7 @@ namespace_use_declaration:
    TANTISLASH? namespace_name TANTISLASH
    "{" listc2(namespace_use_group_clause) "}"
   ";"
-   { $7 |> List.map (fun (_use_kwd_opt_TODO, name, alias_opt) ->
+   { $7 |> Ls.map (fun (_use_kwd_opt_TODO, name, alias_opt) ->
        let full_name = (qiopt $3 $4) @ name in
        NamespaceUse ($1, $2, [Left (full_name, alias_opt)], $9)
       )

@@ -10,7 +10,7 @@ open Common
 (*****************************************************************************)
 (* mostly a copy paste of Test_parsing_php.parse_php *)
 let test_parse_simple xs  =
-  let xs = List.map Common.fullpath xs in
+  let xs = Ls.map Common.fullpath xs in
   let fullxs =
     Lib_parsing_php.find_source_files_of_dir_or_files xs
     |> Skip_code.filter_files_if_skip_list ~root:xs
@@ -349,13 +349,13 @@ let test_type_xdebug_php _file =
     let str = Callgraph_php.s_of_kind_call caller in
 
     let tparams =
-      params +> List.map Typing_trivial_php.type_of_expr in
+      params +> Ls.map Typing_trivial_php.type_of_expr in
     let tret =
       match ret with
       | None -> [Type_php.Unknown]
       | Some e -> Typing_trivial_php.type_of_expr e
     in
-    let ft = [Type_php.Function (tparams +> List.map(fun t -> Some t), tret)] in
+    let ft = [Type_php.Function (tparams +> Ls.map(fun t -> Some t), tret)] in
 
     h +> Common.hupdate_default str
       ~update:(fun old -> Typing_trivial_php.union_type old ft)

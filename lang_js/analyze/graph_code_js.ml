@@ -766,7 +766,7 @@ let build_gen ?(verbose=false) root files =
   (* less: lookup failures summary *)
   let xs = Common2.hkeys hstat_lookup_failures in
   let counts =
-    xs |> List.map (fun (x)->
+    xs |> Ls.map (fun (x)->
       G.string_of_node x,
       List.length (Hashtbl.find_all hstat_lookup_failures x))
     |> Common.sort_by_val_highfirst

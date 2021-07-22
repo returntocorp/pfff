@@ -33,7 +33,7 @@ module TV = Token_views_cpp
 let look_like_argument _tok_before xs =
 
   (* normalize for C++ *)
-  let xs = xs |> List.map (function
+  let xs = xs |> Ls.map (function
     | Tok ({t=TAnd ii} as record) -> Tok ({record with t=TMul ii})
     | x -> x
   )
@@ -109,7 +109,7 @@ let look_like_typedef s =
 let look_like_parameter tok_before xs =
 
   (* normalize for C++ *)
-  let xs = xs |> List.map (function
+  let xs = xs |> Ls.map (function
     | Tok ({t=TAnd ii} as record) -> Tok ({record with t=TMul ii})
     | x -> x
   )

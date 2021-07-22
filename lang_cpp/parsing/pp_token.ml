@@ -101,12 +101,12 @@ type define_body = (unit,string list) either * Parser_cpp.token list
 let (cpp_engine:
        (string, Parser.token list) assoc -> Parser.token list -> Parser.token list)
   = fun env xs ->
-    xs |> List.map (fun tok ->
+    xs |> Ls.map (fun tok ->
       match tok with
       | TIdent (s,_i1) when List.mem_assoc s env -> Common2.assoc s env
       | x -> [x]
     )
-    |> List.flatten
+    |> Ls.flatten
 
 (*
  * We apply a macro by generating new ExpandedToken and by
@@ -135,8 +135,8 @@ let apply_macro_defs defs xs =
          | Right params, bodymacro ->
              if List.length params = List.length xxs
              then
-               let xxs' = xxs |> List.map (fun x ->
-                 (tokens_of_paren_ordered x) |> List.map (fun x ->
+               let xxs' = xxs |> Ls.map (fun x ->
+                 (tokens_of_paren_ordered x) |> Ls.map (fun x ->
                    TH.visitor_info_of_tok Ast.make_expanded x.t
                  )
                ) in
@@ -211,7 +211,7 @@ let rec define_parse xs =
           | TIdent (s, _) -> Some s
           | x -> Common2.error_cant_have x
         ) in
-      let body = body |> List.map
+      let body = body |> Ls.map
                    (TH.visitor_info_of_tok Ast.make_expanded) in
       let def = (s, (Right params, body)) in
       def::define_parse xs
@@ -220,7 +220,7 @@ let rec define_parse xs =
       let (body, _, xs) =
         xs |> Common2.split_when
           (function TCommentNewline_DefineEndOfMacro _ -> true | _ -> false) in
-      let body = body |> List.map
+      let body = body |> Ls.map
                    (TH.visitor_info_of_tok Ast.make_expanded) in
       let def = (s, (Left (), body)) in
       def::define_parse xs

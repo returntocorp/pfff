@@ -78,9 +78,9 @@ let check_overlay ~dir_orig ~dir_overlay =
   )
   in
   let files2 =
-    links |> List.map (fun file_or_dir ->
+    links |> Ls.map (fun file_or_dir ->
       Common.files_of_dir_or_files_no_vcs_nofilter [file_or_dir]
-    ) |> List.flatten
+    ) |> Ls.flatten
   in
   pr2 (spf "#files orig = %d, #links overlay = %d, #files overlay = %d"
          (List.length files) (List.length links) (List.length files2)
@@ -118,7 +118,7 @@ let overlay_equivalences ~dir_orig ~dir_overlay  =
     Common.cmd_to_list (spf "find %s -type l" dir_overlay) in
 
   let equiv =
-    links |> List.map (fun link ->
+    links |> Ls.map (fun link ->
       let stat = Common2.unix_stat_eff link in
       match stat.Unix.st_kind with
       | Unix.S_DIR ->
@@ -127,7 +127,7 @@ let overlay_equivalences ~dir_orig ~dir_overlay  =
                                               "cd %s; find * -type f" (link)) in
           let dir = Common.fullpath link in
 
-          children |> List.map (fun child ->
+          children |> Ls.map (fun child ->
             let overlay = Filename.concat link child in
             let orig = Filename.concat dir child in
             overlay, orig
@@ -136,7 +136,7 @@ let overlay_equivalences ~dir_orig ~dir_overlay  =
           [(link, Common.fullpath link)]
       | _ ->
           []
-    ) |> List.flatten
+    ) |> Ls.flatten
   in
   let data =
     equiv |> Common.map_filter (fun (overlay, orig) ->
@@ -153,7 +153,7 @@ let overlay_equivalences ~dir_orig ~dir_overlay  =
   {
     data = data;
     overlay_to_orig = Common.hash_of_list data;
-    orig_to_overlay = Common.hash_of_list (data |> List.map Common2.swap);
+    orig_to_overlay = Common.hash_of_list (data |> Ls.map Common2.swap);
     root_overlay = dir_overlay;
     root_orig = dir_orig;
   }

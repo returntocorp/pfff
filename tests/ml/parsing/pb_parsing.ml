@@ -1,5 +1,5 @@
 
 let require capa l =
-  List.fold_right (&&)
-    (List.map (require_capa capa) l)
+  Ls.fold_right (&&)
+    (Ls.map (require_capa capa) l)
     true

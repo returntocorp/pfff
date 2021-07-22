@@ -85,7 +85,7 @@ let rec light_db_of_files_or_dirs lang xs =
 
                   let php_files =
                     Lib_parsing_php.find_php_files_of_dir_or_files xs
-                    +> List.map Common2.relative_to_absolute
+                    +> Ls.map Common2.relative_to_absolute
                   in
                   Database_php_build.create_db
                     ~db_support:Database_php.Mem
@@ -127,7 +127,7 @@ let rec light_db_of_files_or_dirs lang xs =
 
 let main_action xs =
 
-  let xs = xs |> List.map Common2.relative_to_absolute in
+  let xs = xs |> Ls.map Common2.relative_to_absolute in
   let db = light_db_of_files_or_dirs !lang xs in
 
   let file =

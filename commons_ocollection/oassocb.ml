@@ -22,5 +22,5 @@ class ['a,'b] oassocb _xs =
     method delkey k = {< data = Map_.remove k data >}
 
     method keys =
-      List.map fst (o#tolist)
+      Ls.map fst (o#tolist)
   end

@@ -115,11 +115,11 @@ let find_big_branching_factor graph_file =
     (* Inheritance transtive closure,
      * todo: could keep 1? the biggest one in terms of use?
     *)
-    |> List.map (fun parent -> Graphe.succ parent hierarchy_transitive)
-    |> List.flatten
+    |> Ls.map (fun parent -> Graphe.succ parent hierarchy_transitive)
+    |> Ls.flatten
     (* Has transitive closure, to also remove the fields, methods of a class *)
-    |> List.map (fun node -> Graph_code.node_and_all_children node g)
-    |> List.flatten
+    |> Ls.map (fun node -> Graph_code.node_and_all_children node g)
+    |> Ls.flatten
   in
 
   let hdead_candidates = Common.hashset_of_list (dead_candidates ()) in
@@ -223,7 +223,7 @@ let find_big_branching_factor graph_file =
           let hxs = Common.hashset_of_list xs in
 
           let users =
-            xs |> List.map (fun node -> users_of_node node) |> List.flatten in
+            xs |> Ls.map (fun node -> users_of_node node) |> Ls.flatten in
 
           (* maybe a newly dead! *)
           if users |> List.for_all (fun node ->
@@ -313,7 +313,7 @@ let extract_transitive_deps xs =
   let max_depth = 4 in
 
   let start_nodes =
-    xs |> List.map (fun path ->
+    xs |> Ls.map (fun path ->
       let node =
         if Sys.is_directory path
         then path, E.Dir

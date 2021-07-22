@@ -19,6 +19,6 @@ class ['a] oassoc_id xs =
     method delkey k = {<  >}
 
     method keys =
-      List.map fst (o#tolist)
+      Ls.map fst (o#tolist)
 
   end

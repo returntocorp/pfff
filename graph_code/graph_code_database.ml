@@ -114,7 +114,7 @@ let db_of_graph_code root g =
 
   { Database_code.
     root = root;
-    files = Common2.hkeys hfiles |> List.map (fun file -> file, 0);
-    dirs = Common2.hkeys hdirs |> List.map (fun dir -> dir, 1);
+    files = Common2.hkeys hfiles |> Ls.map (fun file -> file, 0);
+    dirs = Common2.hkeys hdirs |> Ls.map (fun dir -> dir, 1);
     entities = arr;
   }

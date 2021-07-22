@@ -45,7 +45,7 @@ let use_dypgen = false
 type toplevels_and_tokens = (Ast.toplevel * Parser_cpp.token list) list
 
 let program_of_program2 xs =
-  xs |> List.map fst
+  xs |> Ls.map fst
 
 (*****************************************************************************)
 (* Wrappers *)
@@ -131,7 +131,7 @@ let tokens file =
 (*****************************************************************************)
 
 let rec multi_grouped_list xs =
-  xs |> List.map multi_grouped
+  xs |> Ls.map multi_grouped
 
 and multi_grouped = function
   | Token_views_cpp.Braces (tok1, xs, (Some tok2)) ->
@@ -184,7 +184,7 @@ let parse_fuzzy file =
         Token_helpers_cpp.is_comment x || Token_helpers_cpp.is_eof x
       )
     in
-    let extended = toks |> List.map Token_views_cpp.mk_token_extended in
+    let extended = toks |> Ls.map Token_views_cpp.mk_token_extended in
     Parsing_hacks_cpp.find_template_inf_sup extended;
     let groups = Token_views_cpp.mk_multi extended in
     let trees = multi_grouped_list groups in
@@ -392,7 +392,7 @@ let parse_with_lang ?(lang=Flag_parsing_cpp.Cplusplus) file =
            |> List.filter TH.is_ident_like
          in
          let error_info =
-           (pbline |> List.map (fun tok->PI.str_of_info (TH.info_of_tok tok))),
+           (pbline |> Ls.map (fun tok->PI.str_of_info (TH.info_of_tok tok))),
            line_error
          in
          stat.Stat.problematic_lines <-

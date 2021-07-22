@@ -16,8 +16,8 @@ type t =
 [@@deriving show]
 
 let rec (to_yojson: t -> Y.t) = function
-  | Object xs -> `Assoc (xs |> List.map (fun (s, t) -> s, to_yojson t))
-  | Array xs -> `List (xs |> List.map to_yojson)
+  | Object xs -> `Assoc (xs |> Ls.map (fun (s, t) -> s, to_yojson t))
+  | Array xs -> `List (xs |> Ls.map to_yojson)
   | String s -> `String s
   | Int i -> `Int i
   | Bool b -> `Bool b
@@ -25,8 +25,8 @@ let rec (to_yojson: t -> Y.t) = function
   | Null -> `Null
 
 let rec (from_yojson: Y.t -> t) = function
-  | `Assoc xs -> Object (xs |> List.map (fun (s, t) -> s, from_yojson t))
-  | `List xs -> Array (xs |> List.map from_yojson)
+  | `Assoc xs -> Object (xs |> Ls.map (fun (s, t) -> s, from_yojson t))
+  | `List xs -> Array (xs |> Ls.map from_yojson)
   | `String s -> String s
   | `Int i -> Int i
   | `Bool b -> Bool b

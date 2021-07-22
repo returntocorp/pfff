@@ -829,10 +829,10 @@ let unargs xs =
 let unmodifiers class_vars =
   match class_vars with
   | NoModifiers _ -> []
-  | VModifiers xs -> List.map unwrap xs
+  | VModifiers xs -> Ls.map unwrap xs
 
 let map_paren f (lp, x, rp) = (lp, f x, rp)
-let map_comma_list f xs = List.map (fun x ->
+let map_comma_list f xs = Ls.map (fun x ->
   match x with
   | Left e -> Left (f e)
   | Right tok -> Right tok
@@ -903,7 +903,7 @@ let str_of_name_namespace x =
   match x with
   | Self tok | Parent tok | LateStatic tok -> Parse_info.str_of_info tok
   | XName xs ->
-      xs |> List.map (function
+      xs |> Ls.map (function
         | QITok _ -> "\\"
         | QI id -> str_of_ident id
       ) |> Common.join ""

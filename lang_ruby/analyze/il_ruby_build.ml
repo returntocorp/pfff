@@ -319,7 +319,7 @@ let msg_id_from_string = function
 let rec tuple_of_lhs (lhs:lhs) pos : tuple_expr = match lhs with
   | LId id -> TE (EId id)
   | LTup l ->
-      let l' = List.map (fun x -> tuple_of_lhs x pos) l in
+      let l' = Ls.map (fun x -> tuple_of_lhs x pos) l in
       TTup (l')
   | LStar id -> TStar ((TE (EId id)))
 
@@ -371,7 +371,7 @@ let rec convert_to_return (add_f : tuple_expr -> stmt_node) acc stmt = match stm
         | Some(_) -> eb.exn_body
         | None -> q_to_stmt (convert_to_return add_f acc eb.exn_body)
       in
-      let rescue = List.map convert_rescue eb.exn_rescue in
+      let rescue = Ls.map convert_rescue eb.exn_rescue in
       let ensure = eb.exn_ensure in (* ensure doesn't return a value *)
       let eelse = map_opt q_to_stmt
           (map_opt (convert_to_return add_f acc) eb.exn_else)
@@ -381,7 +381,7 @@ let rec convert_to_return (add_f : tuple_expr -> stmt_node) acc stmt = match stm
 
   | Case cb ->
       let whens' =
-        List.map
+        Ls.map
           (fun (gs,bs) ->
              let q = convert_to_return add_f acc bs in
              let bs' = C.seq (DQueue.to_list q) bs.pos in
@@ -762,7 +762,7 @@ and refactor_super acc lhs pos = match acc.super_args with
 and construct_explicit_regexp acc pos re_interp mods : stmt acc * expr =
   let acc,re_opts,lang,once = parse_regexp_options acc mods pos in
   let build_call acc lhs =
-    let re_interp = List.map
+    let re_interp = Ls.map
         (function
           | Ast.StrExpr _ as c -> c
           | Ast.StrChars (s, t) ->
@@ -1175,9 +1175,9 @@ and add_last_assign ~do_break (id:identifier) (s : stmt) : stmt =
   | ExnBlock(exn) ->
       let body = add_last_assign ~do_break id exn.exn_body in
       let rescue =
-        List.map (fun r -> C.rblock r.rescue_guards
-                     (add_last_assign ~do_break id r.rescue_body)
-                 ) exn.exn_rescue;
+        Ls.map (fun r -> C.rblock r.rescue_guards
+                   (add_last_assign ~do_break id r.rescue_body)
+               ) exn.exn_rescue;
       in
       let ensure = exn.exn_ensure in (* ensure does not return a value *)
       let eelse = map_opt (add_last_assign ~do_break id) exn.exn_else in
@@ -1187,7 +1187,7 @@ and add_last_assign ~do_break (id:identifier) (s : stmt) : stmt =
       let cb' = {
         case_guard = cb.case_guard;
         case_whens =
-          List.map
+          Ls.map
             (fun (gs,ss) ->
                gs, (add_last_assign ~do_break id ss)
             ) cb.case_whens;

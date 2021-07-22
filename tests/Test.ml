@@ -115,7 +115,7 @@ let test regexp =
     then tests
     else
       let paths =
-        OUnit.test_case_paths tests |> List.map OUnit.string_of_path in
+        OUnit.test_case_paths tests |> Ls.map OUnit.string_of_path in
       let keep = paths
                  |> List.filter (fun path ->
                    pr2 path;
@@ -256,7 +256,7 @@ let pfff_extra_actions () = [
     let f file =
       Common.cat file
 
-      |> List.map (fun s ->
+      |> Ls.map (fun s ->
         if s =~ "^\\([A-Za-z_0-9][A-Za-z_0-9][A-Za-z_0-9][A-Za-z_0-9]\\)"
         then Common.matched1 s
         else s

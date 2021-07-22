@@ -154,11 +154,11 @@ let rec program xs =
   module_items env xs
 
 and module_items env xs =
-  xs |> List.map (module_item env) |> List.flatten
+  xs |> Ls.map (module_item env) |> Ls.flatten
 
 and module_item env = function
   | C.It x -> item None env x
-     (*|> List.map (fun res ->
+     (*|> Ls.map (fun res ->
       match res with
       | A.VarDecl var -> A.V var
       | _ ->
@@ -166,7 +166,7 @@ and module_item env = function
          A.S (tok, res)
        )
       *)
-  | C.Import (tok, x, _) -> import env tok x |> List.map (fun x -> A.M x)
+  | C.Import (tok, x, _) -> import env tok x |> Ls.map (fun x -> A.M x)
   | C.Export (tok, x) ->  export env tok x
 
 and import env tok = function
@@ -189,7 +189,7 @@ and import env tok = function
         let n1 = name env n1 in
         [A.ModuleAlias (tok, n1, file)]
       | C.ImportNames xs ->
-        xs |> C.unparen |> C.uncomma |> List.map (fun (n1, n2opt) ->
+        xs |> C.unparen |> C.uncomma |> Ls.map (fun (n1, n2opt) ->
            let n1 = name env n1 in
            let n2 =
               match n2opt with
@@ -211,21 +211,21 @@ and export env tok = function
    [A.DefStmt v; A.M (A.Export (tok, n))]
  | C.ExportDecl x ->
    let xs = item None env x in
-   xs |> List.map (function
+   xs |> Ls.map (function
     | A.DefStmt v ->
          [A.DefStmt v; A.M (A.Export (tok, v.A.v_name))]
     | _ -> raise (UnhandledConstruct ("exporting a stmt", tok))
-   ) |> List.flatten
+   ) |> Ls.flatten
  | C.ExportDefaultDecl (tok2, x) ->
    (* this is ok to have anonymous entities here *)
    let xs = item (Some tok2) env x in
-   xs |> List.map (function
+   xs |> Ls.map (function
     | A.DefStmt v ->
         [A.DefStmt v;  A.M (A.Export (tok,v.A.v_name))]
     | _ -> raise (UnhandledConstruct ("exporting a stmt", tok))
-   ) |> List.flatten
+   ) |> Ls.flatten
  | C.ExportNames (xs, _) ->
-   xs |> C.unparen |> C.uncomma |> List.map (fun (n1, n2opt) ->
+   xs |> C.unparen |> C.uncomma |> Ls.map (fun (n1, n2opt) ->
      let n1 = name env n1 in
      match n2opt with
      | None -> [A.M (A.Export (tok, n1))]
@@ -234,9 +234,9 @@ and export env tok = function
          let id = A.Id (n1, not_resolved ()) in
          let v = A.mk_const_var n2 id in
          [A.DefStmt v; A.M (A.Export (tok, n2))]
-  ) |> List.flatten
+  ) |> Ls.flatten
  | C.ReExportNames (xs, (tok2, path), _) ->
-   xs |> C.unbrace |> C.uncomma |> List.map (fun (n1, n2opt) ->
+   xs |> C.unbrace |> C.uncomma |> Ls.map (fun (n1, n2opt) ->
      let n1 = name env n1 in
      let tmpname = ("!tmp_" ^ fst n1, snd n1) in
      let file = path_to_file path in
@@ -250,7 +250,7 @@ and export env tok = function
        let n2 = name env n2 in
        let v = A.mk_const_var n2 id in
        [A.M import; A.DefStmt v; A.M (A.Export (tok, n2))]
-   ) |> List.flatten
+   ) |> Ls.flatten
 
  | C.ReExportNamespace (t1, (t2, filename), _sc) ->
    [A.M (A.ReExportNamespace (tok, t1, t2, filename))]
@@ -328,9 +328,9 @@ and property_name env = function
 
 and stmt env = function
   | C.VarsDecl (vkind, bindings, _) ->
-    bindings |> C.uncomma |> List.map (fun x ->
+    bindings |> C.uncomma |> Ls.map (fun x ->
      let vars = var_binding env vkind x in
-     vars |> List.map (fun var -> A.DefStmt var)) |> List.flatten
+     vars |> Ls.map (fun var -> A.DefStmt var)) |> Ls.flatten
   | C.Block (t1, x, t2) ->
     [A.Block (t1, stmt_item_list env x, t2)]
   | C.Nop _ ->
@@ -361,8 +361,8 @@ and stmt env = function
        match lhs_vars_opt with
        | Some (C.LHS1 e) -> Right (expr env e)
        | Some (C.ForVars ((vkind, vbindings))) ->
-         Left (vbindings |> C.uncomma |> List.map (fun x ->
-             (var_binding env vkind x)) |> List.flatten)
+         Left (vbindings |> C.uncomma |> Ls.map (fun x ->
+             (var_binding env vkind x)) |> Ls.flatten)
        | None -> Left []
      in
      let e2 = expr_opt env e2opt in
@@ -414,7 +414,7 @@ and stmt env = function
     [A.For (t, A.ForEllipsis t2, st)]
   | C.Switch (tok, e, xs) ->
     let e = e |> C.unparen |> expr env in
-    let xs = xs |> C.unparen |> List.map (case_clause env) in
+    let xs = xs |> C.unparen |> Ls.map (case_clause env) in
     [A.Switch (tok, e, xs)]
   | C.Continue (t, lopt, _) ->
     [A.Continue (t, opt label env lopt)]
@@ -451,7 +451,7 @@ and case_clause env = function
 
 and stmt_item_list env items =
  let rec aux acc env = function
-    | [] -> List.rev acc |> List.flatten
+    | [] -> List.rev acc |> Ls.flatten
     | x::xs ->
       let ys = item None env x in
       let env =
@@ -526,13 +526,13 @@ and (expr: env -> C.expr -> A.expr) = fun env e ->
     A.ArrAccess (e, e2)
   | C.Object xs ->
     A.Obj (bracket_keep
-          (fun xs -> xs |> C.uncomma |> List.map (property env)) xs)
+          (fun xs -> xs |> C.uncomma |> Ls.map (property env)) xs)
   | C.Array (xs) ->
     (* A.Obj (array_obj env 0 tok xs) *)
     A.Arr (bracket_keep (array_arr env (fst3 xs)) xs)
   | C.Apply (e, (t1, es, t2)) ->
     let e = expr env e in
-    let es = List.map (expr env) (es |> C.uncomma) in
+    let es = Ls.map (expr env) (es |> C.uncomma) in
     A.Apply (e, (t1, es, t2))
   | C.Conditional (e1, _, e2, _, e3) ->
     let e1 = expr env e1 in
@@ -592,7 +592,7 @@ and (expr: env -> C.expr -> A.expr) = fun env e ->
 
   | C.TemplateString (exp_opt, (tok, xs, _)) ->
     let special = A.Encaps (exp_opt <> None) in
-    let xs = List.map (encaps env) xs in
+    let xs = Ls.map (encaps env) xs in
     let xs =
         match exp_opt with
         | None -> xs
@@ -618,14 +618,14 @@ and (expr: env -> C.expr -> A.expr) = fun env e ->
 and xhp_html env = function
   | C.Xhp (tag, attrl, _, body, _) ->
       let tag, tok = tag in
-      let attrl = List.map (xhp_attribute env) attrl in
+      let attrl = Ls.map (xhp_attribute env) attrl in
       { A.xml_tag = (A.string_of_xhp_tag tag, tok);
         A.xml_attrs = attrl;
-        A.xml_body = List.map (xhp_body env) body;
+        A.xml_body = Ls.map (xhp_body env) body;
       }
   | C.XhpSingleton (tag, attrl, _) ->
       let tag, tok = tag in
-      let attrl = List.map (xhp_attribute env) attrl in
+      let attrl = Ls.map (xhp_attribute env) attrl in
       { A.xml_tag = (A.string_of_xhp_tag tag, tok);
         A.xml_attrs = attrl;
         A.xml_body = [];
@@ -748,7 +748,7 @@ and var_binding env vkind = function
 (* only when not !transpile_pattern *)
 and pattern env = function
   | C.PatObj (t1, xs, t2) ->
-     A.Obj (t1, xs |> C.uncomma |> List.map (function
+     A.Obj (t1, xs |> C.uncomma |> Ls.map (function
       | C.PatId (n, None) ->
          let n = name env n in
          A.Field {A.fld_name = A.PN n; fld_attrs = []; fld_type = None;
@@ -771,7 +771,7 @@ and pattern env = function
 
   (* TODO: comma_list can contain multiple Right in a row because of elision *)
   | C.PatArr (t1, xs, t2) ->
-      A.Arr (t1, xs |> C.uncomma |> List.map (pattern env), t2)
+      A.Arr (t1, xs |> C.uncomma |> Ls.map (pattern env), t2)
   | C.PatId (n, None) ->
       let n = name env n in
       A.Id (n, not_resolved ())
@@ -835,10 +835,10 @@ and func_decl env
   let props = func_props env f_kind f_properties in
   let params_and_vars =
    f_params |> C.unparen |> C.uncomma |> Common.index_list_0 |>
-    List.map (fun (p, idx) -> parameter_binding env idx p)
+    Ls.map (fun (p, idx) -> parameter_binding env idx p)
   in
-  let params = params_and_vars |> List.map fst in
-  let vars = params_and_vars |> List.map snd |> List.flatten in
+  let params = params_and_vars |> Ls.map fst in
+  let vars = params_and_vars |> Ls.map snd |> Ls.flatten in
   let env = add_params env params in
   let xs = stmt_item_list env (f_body |> C.unparen) in
   let body = Ast_js.stmt_of_stmts (vars @ xs) in
@@ -852,10 +852,10 @@ and func_props _env kind props =
   | C.F_get (tok, _) -> [A.Get, tok]
   | C.F_set (tok, _) -> [A.Set, tok]
   ) @
-  (props |> List.map (function
+  (props |> Ls.map (function
    | C.Generator tok -> A.Generator, tok
    | C.Async tok -> A.Async, tok
-   ))) |> List.map A.attr
+   ))) |> Ls.map A.attr
 
 (* return a parameter and a list of vars when transpiling patterns *)
 and parameter_binding env idx = function
@@ -881,7 +881,7 @@ and parameter_binding env idx = function
                  }
          in
          let p = parameter env p in
-         A.ParamClassic p, vars |> List.map (fun x -> A.DefStmt x)
+         A.ParamClassic p, vars |> Ls.map (fun x -> A.DefStmt x)
      with Failure s ->
        raise (TodoConstruct(spf "ParamPattern:%s" s, tok))
      )
@@ -924,9 +924,9 @@ and arrow_func env x =
   in
   let params_and_vars =
         bindings |> Common.index_list_0
-        |> List.map (fun (p, idx) -> parameter_binding env idx p) in
-  let params = params_and_vars |> List.map fst in
-  let vars = params_and_vars |> List.map snd |> List.flatten in
+        |> Ls.map (fun (p, idx) -> parameter_binding env idx p) in
+  let params = params_and_vars |> Ls.map fst in
+  let vars = params_and_vars |> Ls.map snd |> Ls.flatten in
   let env = add_params env params in
   let xs =
     match x.C.a_body with
@@ -1000,10 +1000,10 @@ and class_decl env { C.c_tok; c_extends; c_body; c_implements;
   let implements =
     match c_implements with
     | None -> []
-    | Some (_tok, xs) -> xs |> C.uncomma |> List.map (type_ env)
+    | Some (_tok, xs) -> xs |> C.uncomma |> Ls.map (type_ env)
   in
   let xs = c_body |> bracket_keep
-      (fun xs -> xs |> List.map (class_element env) |> List.flatten) in
+      (fun xs -> xs |> Ls.map (class_element env) |> Ls.flatten) in
   { c_kind = G.Class, c_tok; c_attrs = [];
     A.c_extends = extends; c_implements = implements;
     c_body = xs;
@@ -1016,7 +1016,7 @@ and static _env t = A.Static, t
 and class_element env = function
   | C.C_field ({C.fld_name; fld_init; fld_type; fld_static}, _sc) ->
     let fld_name = property_name env fld_name in
-    let fld_attrs = opt static env fld_static |> opt_to_list |> List.map A.attr in
+    let fld_attrs = opt static env fld_static |> opt_to_list |> Ls.map A.attr in
     let fld_body = init_opt env fld_init in
     let fld_type = type_opt env fld_type in
     [A.Field {A.fld_name; fld_attrs; fld_type; fld_body}]
@@ -1044,8 +1044,8 @@ and method_ env props x =
       raise (UnhandledConstruct ("weird method decl: unexpected F_func",
                                   fst3 x.C.f_params))
   in
-  let fprops = fprops |> List.map A.attr in
-  let props = props |> List.map A.attr in
+  let fprops = fprops |> Ls.map A.attr in
+  let props = props |> Ls.map A.attr in
   let fun_ = { fun_ with A.f_attrs = fprops @ fun_.A.f_attrs } in
   let ty = None in
   A.Field {A.fld_name = pname; fld_attrs = props; fld_type = ty;

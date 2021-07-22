@@ -121,7 +121,7 @@ let parse file =
       in
 
       (* check for ambiguous parse trees *)
-      let l = List.map fst lst in
+      let l = Ls.map fst lst in
       let l' = HH.uniq_list (fun a b -> if Ast_ruby.equal_stmts a b then 0 else -1) l in
       HH.do_fail "program" l' Ast_ruby.show_program;
 
@@ -183,7 +183,7 @@ let any_of_string str =
           in
 
           (* check for ambiguous parse trees *)
-          let l = List.map fst lst in
+          let l = Ls.map fst lst in
           let l' = HH.uniq_list (fun a b -> if Ast_ruby.equal_any a b then 0 else -1) l in
           HH.do_fail "any" l' Ast_ruby.show_any;
 

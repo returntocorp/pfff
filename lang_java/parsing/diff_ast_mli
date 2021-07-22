@@ -118,7 +118,7 @@
 +  let dcl (v, init) =
 +    f { f_var = canon_var mods vtype v; f_init = init }
 +  in
-+  List.map dcl vars
++  Ls.map dcl vars
 +
 +let field_decls = decls (fun x -> Field x)
 +

@@ -42,7 +42,7 @@ let graph_to_gefx ~str_of_node ~output ~tree ~weight_edges g =
     let nodes_xml =
       match tree with
       | None ->
-          nodes |> List.map (fun n ->
+          nodes |> Ls.map (fun n ->
             let modularity_class = "nothing"
 (*
               let s = str_of_node n in
@@ -81,7 +81,7 @@ let graph_to_gefx ~str_of_node ~output ~tree ~weight_edges g =
                   "label", str_of_node f;
                 ], [])
             | Common2.Node (dir, xs) ->
-                let children = List.map aux xs in
+                let children = Ls.map aux xs in
                 Element ("node", [
                   "id", i_to_s (G.ivertex dir g);
                   "label", String.uppercase (str_of_node dir) ^ "/";
@@ -92,7 +92,7 @@ let graph_to_gefx ~str_of_node ~output ~tree ~weight_edges g =
           in
           [aux tree]
     in
-    let edges_xml = nodes |> List.map (fun n ->
+    let edges_xml = nodes |> Ls.map (fun n ->
       let succ = G.succ n g in
       succ |> Common.map_filter (fun n2 ->
         let weight =
@@ -110,7 +110,7 @@ let graph_to_gefx ~str_of_node ~output ~tree ~weight_edges g =
             "weight", spf "%5.1f" weight;
           ], [])
         )
-      )) |> List.flatten
+      )) |> Ls.flatten
     in
     let xml =
       Element (

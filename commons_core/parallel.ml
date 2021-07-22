@@ -162,9 +162,9 @@ let invoke f x =
 
 let parallel_map f xs =
   (* create all the fork *)
-  let futures = List.map (invoke f) xs in
+  let futures = Ls.map (invoke f) xs in
   (* sync, get all parents to waitpid *)
-  List.map (fun futur -> futur ()) futures
+  Ls.map (fun futur -> futur ()) futures
 
 (*****************************************************************************)
 (* Poor's man job scheduler *)
@@ -187,13 +187,13 @@ type 'a jobs = ('a job) list
  *)
 let map_jobs ~tasks xs =
   if tasks = 1
-  then List.map (fun job -> job ()) xs
+  then Ls.map (fun job -> job ()) xs
   else
     let xxs = Common2.pack_safe tasks xs in
-    xxs |> List.map (fun xs ->
+    xxs |> Ls.map (fun xs ->
       (* do in parallel a batch of job *)
       parallel_map (fun job -> job ()) xs
-    ) |> List.flatten
+    ) |> Ls.flatten
 
 
 (*
@@ -211,15 +211,15 @@ let map_jobs ~tasks xs =
  *)
 let map_batch_jobs ~tasks xs =
   if tasks = 1
-  then List.map (fun job -> job ()) xs
+  then Ls.map (fun job -> job ()) xs
   else
     (* todo? a double pack ? because the initial pack/chunks can
      * be computationaly "inbalanced".
     *)
     let xxs = Common2.chunks tasks xs in
-    let jobs = xxs |> List.map (fun xs ->
+    let jobs = xxs |> Ls.map (fun xs ->
       (fun () ->
-         xs |> List.map (fun job -> job ())
+         xs |> Ls.map (fun job -> job ())
       ))
     in
-    parallel_map (fun job -> job ()) jobs |> List.flatten
+    parallel_map (fun job -> job ()) jobs |> Ls.flatten

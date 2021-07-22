@@ -19,7 +19,7 @@ let test_tokens_ml file =
   ()
 
 let test_parse_ml_or_mli xs =
-  let xs = List.map Common.fullpath xs in
+  let xs = Ls.map Common.fullpath xs in
 
   let fullxs =
     Lib_parsing_ml.find_source_files_of_dir_or_files xs

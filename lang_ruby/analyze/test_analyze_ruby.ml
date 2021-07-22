@@ -8,7 +8,7 @@ module PI = Parse_info
 (*****************************************************************************)
 
 let test_parse xs =
-  let xs = List.map Common.fullpath xs in
+  let xs = Ls.map Common.fullpath xs in
 
   let fullxs =
     Lib_parsing_ruby.find_source_files_of_dir_or_files xs

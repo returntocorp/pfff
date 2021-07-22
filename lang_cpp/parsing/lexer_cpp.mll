@@ -677,7 +677,7 @@ and string  = parse
   *)
  (*
   | [^ '\\']+
-    { let cs = lexbuf |> tok |> list_of_string |> List.map Char.code in
+    { let cs = lexbuf |> tok |> list_of_string |> Ls.map Char.code in
       cs ++ string lexbuf
     }
   *)

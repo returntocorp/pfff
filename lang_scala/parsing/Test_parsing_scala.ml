@@ -21,7 +21,7 @@ let test_tokens file =
   ()
 
 let test_parse xs =
-  let xs = List.map Common.fullpath xs in
+  let xs = Ls.map Common.fullpath xs in
 
   let fullxs =
     Parse_scala.find_source_files_of_dir_or_files xs

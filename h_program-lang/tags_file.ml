@@ -139,16 +139,16 @@ let add_method_tags_when_unambiguous files_and_defs =
 
   (* step1: global analysis on all defs, remember all names and methods *)
   let h_toplevel_names =
-    files_and_defs |> List.map (fun (_file, tags) ->
+    files_and_defs |> Ls.map (fun (_file, tags) ->
       tags |> Common.map_filter (fun t ->
         match t.kind with
         | E.Class | E.Function | E.Constant -> Some t.tagname
         | _ -> None
       )
-    ) |> List.flatten |> Common.hashset_of_list
+    ) |> Ls.flatten |> Common.hashset_of_list
   in
   let h_grouped_methods =
-    files_and_defs |> List.map (fun (_file, tags) ->
+    files_and_defs |> Ls.map (fun (_file, tags) ->
       tags |> Common.map_filter (fun t ->
         match t.kind with
         | E.Method ->
@@ -158,12 +158,12 @@ let add_method_tags_when_unambiguous files_and_defs =
         | _ -> None
       )
       (* could skip the group_assoc_bykey and do Hashtbl.find_all below instead *)
-    ) |> List.flatten |> Common.group_assoc_bykey_eff |> Common.hash_of_list
+    ) |> Ls.flatten |> Common.group_assoc_bykey_eff |> Common.hash_of_list
   in
   (* step2: add method tag when no ambiguity *)
-  files_and_defs |> List.map (fun (file, tags) ->
+  files_and_defs |> Ls.map (fun (file, tags) ->
     file,
-    tags |> List.map (fun t ->
+    tags |> Ls.map (fun t ->
       match t.kind with
       | E.Method ->
           if t.tagname =~ ".*::\\(.*\\)"
@@ -175,7 +175,7 @@ let add_method_tags_when_unambiguous files_and_defs =
             else [t]
           else failwith("method tag should contain '::[, got: " ^ t.tagname)
       | _ -> [t]
-    ) |> List.flatten
+    ) |> Ls.flatten
   )
 
 (*****************************************************************************)
@@ -209,7 +209,7 @@ let generate_vi_tags_file tags_file files_and_defs =
   Common.with_open_outfile tags_file (fun (pr_no_nl, _chan) ->
 
     let all_tags =
-      files_and_defs |> List.map (fun (file, defs) ->
+      files_and_defs |> Ls.map (fun (file, defs) ->
         defs |> Common.map_filter (fun tag ->
           if String.length tag.tag_definition_text > 300
           then begin
@@ -218,7 +218,7 @@ let generate_vi_tags_file tags_file files_and_defs =
           end
           else Some (tag.tagname, (tag, file))
         ))
-      |> List.flatten
+      |> Ls.flatten
       |> Common.sort_by_key_lowfirst
     in
     all_tags |> List.iter (fun (_tagname, (tag, file)) ->

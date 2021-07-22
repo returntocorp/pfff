@@ -307,7 +307,7 @@ let display_treemap_generic
            let rect = { p = p; q = q } in
 
            let children' =
-             children |> List.map (fun child ->
+             children |> Ls.map (fun child ->
                float_of_int (size_of_treemap_node child),
                child
              )

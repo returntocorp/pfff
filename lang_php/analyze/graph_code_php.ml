@@ -203,7 +203,7 @@ let look_like_class s =
 let privacy_of_modifiers modifiers =
   (* yes, default is public ... I love PHP *)
   let p = ref E.Public in
-  modifiers |> List.map fst |> List.iter (function
+  modifiers |> Ls.map fst |> List.iter (function
     | Cst_php.Public -> p := E.Public
     | Cst_php.Private -> p := E.Private
     | Cst_php.Protected -> p := E.Protected
@@ -212,7 +212,7 @@ let privacy_of_modifiers modifiers =
   !p
 
 let property_of_modifiers modifiers =
-  modifiers |> List.map fst |> Common.map_filter (function
+  modifiers |> Ls.map fst |> Common.map_filter (function
     | Cst_php.Public | Cst_php.Private | Cst_php.Protected -> None
     | Cst_php.Static -> Some E.Static
     | Cst_php.Abstract -> Some E.Abstract
@@ -246,7 +246,7 @@ let (ident_of_name: Ast.name -> Ast.ident) = function
 let add_prefix qu =
   match qu with
   | [] -> ""
-  | x::xs -> ((x::xs) |> List.map Ast.str_of_ident |> Common.join "\\")^"\\"
+  | x::xs -> ((x::xs) |> Ls.map Ast.str_of_ident |> Common.join "\\")^"\\"
 
 let prune_special_root xs =
   match xs with
@@ -281,13 +281,13 @@ let (strtok_of_name: env -> Ast.name -> Entity_code.entity_kind ->
   let candidates = fully_qualified_candidates env.cur name kind in
   try
     candidates |> Common.find_some (fun fullname ->
-      let str = fullname |> List.map Ast.str_of_ident |> Common.join "\\" in
+      let str = fullname |> Ls.map Ast.str_of_ident |> Common.join "\\" in
       if G.has_node (str, kind) env.g
       then Some (R str, tokopt)
       else None
     )
   with Not_found ->
-    let str = name |> List.map Ast.str_of_ident |> Common.join "\\" in
+    let str = name |> Ls.map Ast.str_of_ident |> Common.join "\\" in
     R str, tokopt
 
 
@@ -1150,7 +1150,7 @@ let build
                       (G.string_of_node node) (Common.dump files))
       in
 
-      let dupes = orig_file::List.map fst files in
+      let dupes = orig_file::Ls.map fst files in
       let cnt = List.length dupes in
 
       let (in_skip_errors, other) =

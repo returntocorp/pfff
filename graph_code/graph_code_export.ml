@@ -50,10 +50,10 @@ let json_of_node g (str, kind) =
 let graph_to_json g =
   J.Object [
     "nodes", J.Array (
-      G.all_nodes g |> List.map (json_of_node g)
+      G.all_nodes g |> Ls.map (json_of_node g)
     );
     "edges_Use", J.Array (
-      G.all_use_edges g |> List.map (fun (src, dst) ->
+      G.all_use_edges g |> Ls.map (fun (src, dst) ->
         J.Object [
           "src", json_short_of_node src;
           "dst", json_short_of_node dst;

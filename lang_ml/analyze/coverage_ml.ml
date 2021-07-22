@@ -37,7 +37,7 @@ open Common
 let basename_coverage_to_readable_coverage xs root =
   let files = Lib_parsing_ml.find_ml_files_of_dir_or_files [root] in
   let finder = Graph_code.basename_to_readable_disambiguator ~root files in
-  xs |> List.map (fun (file, cover) ->
+  xs |> Ls.map (fun (file, cover) ->
     match finder file with
     | [] ->
         failwith (spf "could not find basename %s in directory %s" file root)

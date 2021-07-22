@@ -155,10 +155,10 @@ let l = (Lexing.dummy_pos, Lexing.dummy_pos)
     in one of your source file those definitions:
 
          let string_of_list f xs =
-           "[" ^ (xs +> List.map f +> String.concat ";" ) ^ "]"
+           "[" ^ (xs +> Ls.map f +> String.concat ";" ) ^ "]"
 
          let string_of_array f xs =
-           "[|" ^ (xs +> Array.to_list +> List.map f +> String.concat ";") ^ "|]"
+           "[|" ^ (xs +> Array.to_list +> Ls.map f +> String.concat ";") ^ "|]"
 
          let string_of_option f = function
            | None -> "None "
@@ -205,7 +205,7 @@ EXTEND
 	  | xs -> PaTup (l,xs)
 	in
 
-	let funcs = tdl +> List.map (fun ((l,str), param_polymorphs, ctyp, z) ->
+	let funcs = tdl +> Ls.map (fun ((l,str), param_polymorphs, ctyp, z) ->
 	  let join_app  xs = xs +> foldl1 (fun a e -> <:expr< $a$ ^ $e$>>) in
 	  let join_virg xs = xs +> join_gen (ExStr (l, ",")) in
 
@@ -227,8 +227,8 @@ EXTEND
 	    | TyQuo (l, s) -> ExApp (l, ExLid(l, "str__of_" ^ s), ExLid (l,id))
 	    | TySum (l,_bool, xs) ->
 		ExMat(l, ExLid (l, id),
-		      xs +> List.map (fun (l, s, ctyps) ->
-			let newids = xs +> List.map (fun _ -> name ()) in
+		      xs +> Ls.map (fun (l, s, ctyps) ->
+			let newids = xs +> Ls.map (fun _ -> name ()) in
 			match ctyps, newids with
 			| ([],_) -> (PaUid(l, s), None, ExStr (l,s))
 			| (x::xs,id::ids) ->
@@ -237,18 +237,18 @@ EXTEND
 				(fun a (e,id) -> PaApp (l, a, PaLid (l,id)))
 				(PaApp (l, PaUid(l, s), PaLid(l, id))) in
 			    (patt, None,
-			     zip (x::xs) (id::ids) +> List.map (fun (e,id) -> body_ctyp id e) +> join_virg +>
+			     zip (x::xs) (id::ids) +> Ls.map (fun (e,id) -> body_ctyp id e) +> join_virg +>
 			     (fun xs -> [ExStr (l,s); ExStr (l,"(")] @ xs @ [ExStr (l,")")]) +> join_app
 			    )
 			| _ -> failwith "pb"
 				     )
 		     )
 	    | TyTup (l, xs) ->
-		let newids = xs +> List.map (fun _ -> name ()) in
+		let newids = xs +> Ls.map (fun _ -> name ()) in
 		ExMat(l, ExLid (l,id),
-		      [PaTup(l, newids +> List.map (fun id -> PaLid (l,id))),
+		      [PaTup(l, newids +> Ls.map (fun id -> PaLid (l,id))),
 		      None,
-		      zip xs newids +> List.map (fun (e,id) -> body_ctyp id e) +> join_virg +>
+		      zip xs newids +> Ls.map (fun (e,id) -> body_ctyp id e) +> join_virg +>
 			(fun xs -> [ExStr (l,"(")] @ xs @ [ExStr (l,")")]) +> join_app
 		      ]
 		     )
@@ -258,7 +258,7 @@ EXTEND
 		  | TyApp (l,c1', c2') -> extract_all_params (acc @ [c2']) c1'
 		  | x -> (x, acc) in
 		let (type_parameted, params) = extract_all_params [] (TyApp (l, c1, c2)) in
-		let funcs = params +> List.map (fun c ->
+		let funcs = params +> Ls.map (fun c ->
 		  let id = name () in
 		  let f = body_ctyp id c in
 		  ExFun (l, [PaLid(l, id), None, f]))
@@ -269,12 +269,12 @@ EXTEND
 		  | _ -> ExStr (l,"<illegal syntax in type, should be a typeconst>")
 		  )
 	    | TyRec (l, _bool, xs) ->
-		let newids = xs +> List.map (fun _ -> name ()) in
+		let newids = xs +> Ls.map (fun _ -> name ()) in
 		ExMat(l, ExLid (l, id),
-		      [ PaRec (l, zip xs newids +> List.map (fun ((_,e,_,_), id) -> PaLid(l, e), PaLid(l, id))),
+		      [ PaRec (l, zip xs newids +> Ls.map (fun ((_,e,_,_), id) -> PaLid(l, e), PaLid(l, id))),
 			None,
 			zip xs newids
-			  +> List.map
+			  +> Ls.map
 			    (fun ((l,s,_b,e),id) -> [ExStr(l,s); ExStr(l," = ");body_ctyp id e] +> join_app)
 			  +> join_virg
 			  +> (fun xs -> [ExStr (l,"{")] @ xs @ [ExStr (l,"}")]) +> join_app
@@ -305,7 +305,7 @@ EXTEND
 	    *)
 	    if  param_polymorphs = [] then body
 	    else ExFun (l, [pa_tuple
-			       (param_polymorphs +> List.map (fun (str_poly,(_,_)) ->
+			       (param_polymorphs +> Ls.map (fun (str_poly,(_,_)) ->
 				 PaLid (l, "str__of_" ^ str_poly))),
 			     None, body])
 	  in
@@ -331,7 +331,7 @@ EXTEND
 	  ])
 	in
 	let recursif = true in
-	(StDcl (loc, [(StTyp (loc, tdl));StVal (loc, recursif, funcs +> List.flatten)]))
+	(StDcl (loc, [(StTyp (loc, tdl));StVal (loc, recursif, funcs +> Ls.flatten)]))
 ]]
       ;
     END
@@ -469,15 +469,15 @@ EXTEND
 END;;
 *)
 (*
-   [ expr1 | x <- expr2]        ----> expr2 +> List.map (fun x -> expr1)
-   [ expr1 | x <- expr2, x > 2] ----> expr2 +> List.filter (fun x -> x > 2) +> List.map (fun x -> expr1)
+   [ expr1 | x <- expr2]        ----> expr2 +> Ls.map (fun x -> expr1)
+   [ expr1 | x <- expr2, x > 2] ----> expr2 +> List.filter (fun x -> x > 2) +> Ls.map (fun x -> expr1)
  TODO better than | to separate filter
 *)
 
 (******************************************************************************)
 (*
 use:
-   let x = {1 .. 10} +> List.map (fun i -> i)
+   let x = {1 .. 10} +> Ls.map (fun i -> i)
    you need space between token (dont know really why)
    you need the enum function: let rec enum x n = if x = n then [n] else x::enum (x+1)  n
 
@@ -562,7 +562,7 @@ EXTEND
 	  | xs -> PaTup (l,xs)
 	in
 
-	let funcs = tdl +> List.map (fun ((l,str), param_polymorphs, ctyp, z) ->
+	let funcs = tdl +> Ls.map (fun ((l,str), param_polymorphs, ctyp, z) ->
 	  let join_app  xs = xs +> foldl1 (fun a e -> ExApp(l, ExApp (l, ExLid (l, "^"), a), e)) in
 	  let join_virg xs = xs +> join_gen (ExStr (l, ",")) in
 
@@ -579,8 +579,8 @@ EXTEND
 	    | TyQuo (l, s) -> ExApp (l, ExLid(l, "str__of_" ^ s), ExLid (l,id))
 	    | TySum (l, xs) ->
 		ExMat(l, ExLid (l, id),
-		      xs +> List.map (fun (l, s, ctyps) ->
-			let newids = xs +> List.map (fun _ -> name ()) in
+		      xs +> Ls.map (fun (l, s, ctyps) ->
+			let newids = xs +> Ls.map (fun _ -> name ()) in
 			match ctyps, newids with
 			| ([],_) -> (PaUid(l, s), None, ExStr (l,s))
 			| (x::xs,id::ids) ->
@@ -588,18 +588,18 @@ EXTEND
 				(fun a (e,id) -> PaApp (l, a, PaLid (l,id))
 				) (PaApp (l, PaUid(l, s), PaLid(l, id))) in
 			    (patt, None,
-			     zip (x::xs) (id::ids) +> List.map (fun (e,id) -> body_ctyp id e) +> join_virg +>
+			     zip (x::xs) (id::ids) +> Ls.map (fun (e,id) -> body_ctyp id e) +> join_virg +>
 			     (fun xs -> [ExStr (l,s); ExStr (l,"(")] @ xs @ [ExStr (l,")")]) +> join_app
 			    )
 			| _ -> failwith "pb"
 				     )
 		     )
 	    | TyTup (l, xs) ->
-		let newids = xs +> List.map (fun _ -> name ()) in
+		let newids = xs +> Ls.map (fun _ -> name ()) in
 		ExMat(l, ExLid (l,id),
-		      [PaTup(l, newids +> List.map (fun id -> PaLid (l,id))),
+		      [PaTup(l, newids +> Ls.map (fun id -> PaLid (l,id))),
 		      None,
-		      zip xs newids +> List.map (fun (e,id) -> body_ctyp id e) +> join_virg +>
+		      zip xs newids +> Ls.map (fun (e,id) -> body_ctyp id e) +> join_virg +>
 			(fun xs -> [ExStr (l,"(")] @ xs @ [ExStr (l,")")]) +> join_app
 		      ]
 		     )
@@ -609,7 +609,7 @@ EXTEND
 		  | TyApp (l,c1', c2') -> extract_all_params (acc @ [c2']) c1'
 		  | x -> (x, acc) in
 		let (type_parameted, params) = extract_all_params [] (TyApp (l, c1, c2)) in
-		let funcs = params +> List.map (fun c ->
+		let funcs = params +> Ls.map (fun c ->
 		  let id = name () in
 		  let f = body_ctyp id c in
 		  ExFun (l, [PaLid(l, id), None, f]))
@@ -620,12 +620,12 @@ EXTEND
 		  | _ -> ExStr (l,"<illegal syntax in type, should be a typeconst>")
 		  )
 	    | TyRec (l, xs) ->
-		let newids = xs +> List.map (fun _ -> name ()) in
+		let newids = xs +> Ls.map (fun _ -> name ()) in
 		ExMat(l, ExLid (l, id),
-		      [ PaRec (l, zip xs newids +> List.map (fun ((_,e,_,_), id) -> PaLid(l, e), PaLid(l, id))),
+		      [ PaRec (l, zip xs newids +> Ls.map (fun ((_,e,_,_), id) -> PaLid(l, e), PaLid(l, id))),
 			None,
 			zip xs newids
-			  +> List.map
+			  +> Ls.map
 			    (fun ((l,s,_b,e),id) -> [ExStr(l,s); ExStr(l," = ");body_ctyp id e] +> join_app)
 			  +> join_virg
 			  +> (fun xs -> [ExStr (l,"{")] @ xs @ [ExStr (l,"}")]) +> join_app
@@ -656,7 +656,7 @@ EXTEND
 	    *)
 	    if  param_polymorphs = [] then body
 	    else ExFun (l, [pa_tuple
-			       (param_polymorphs +> List.map (fun (str_poly,(_,_)) ->
+			       (param_polymorphs +> Ls.map (fun (str_poly,(_,_)) ->
 				 PaLid (l, "str__of_" ^ str_poly))),
 			     None, body])
 	  in
@@ -682,7 +682,7 @@ EXTEND
 	  ])
 	in
 	let recursif = true in
-	(StDcl (loc, [(StTyp (loc, tdl));StVal (loc, recursif, funcs +> List.flatten)]))
+	(StDcl (loc, [(StTyp (loc, tdl));StVal (loc, recursif, funcs +> Ls.flatten)]))
 ]]
       ;
     END
@@ -754,7 +754,7 @@ let gen_print_cons_expr loc c tl =
     [] -> pr_con
   | _ ->
       let pr_params =
-        let type_funs = List.map (gen_print_type loc) tl in
+        let type_funs = Ls.map (gen_print_type loc) tl in
         list_mapi (gen_call loc) type_funs
       in
       let pr_all = gen_print_con_extra_syntax loc pr_params in
@@ -767,7 +767,7 @@ let gen_print_cons_expr loc c tl =
         p, None, e
 
 let gen_print_sum loc cdl =
-  let pwel = List.map gen_print_cons cdl in
+  let pwel = Ls.map gen_print_cons cdl in
   <:expr< fun [ $list:pwel$ ] >>
 
 let gen_one_print_fun loc ((loc, n), tpl, tk, cl) =
@@ -777,7 +777,7 @@ let gen_one_print_fun loc ((loc, n), tpl, tk, cl) =
         | _ -> <:expr< fun _ -> failwith $str:fun_name n$ >>
       in
       let body =
-        List.fold_right
+        Ls.fold_right
           (fun (v, _) e ->
             <:expr< fun $lid:fun_param_name v$ -> $e$ >>)
           tpl body
@@ -785,7 +785,7 @@ let gen_one_print_fun loc ((loc, n), tpl, tk, cl) =
       <:patt< $lid:fun_name n$ >>, body
 
 let gen_print_funs loc tdl =
-  let pel = List.map (gen_one_print_fun loc) tdl in
+  let pel = Ls.map (gen_one_print_fun loc) tdl in
   <:str_item< value rec $list:pel$ >>
 
 *)

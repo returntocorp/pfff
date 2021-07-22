@@ -68,7 +68,7 @@ let is_top_env env =
 
 (* use a ref because we may want to modify it *)
 let (initial_env: environment ref) =
-  (* less:  Env_php.globals_builtins +> List.map (fun s ->
+  (* less:  Env_php.globals_builtins +> Ls.map (fun s ->
    * fake_dname s, (S.Global, ref 1)
    * )
   *)

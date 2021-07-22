@@ -30,7 +30,7 @@ let (lookup_fully_qualified2:
     | x::xs ->
         let children = G.children current g in
         (* because have File intermediate (noisy) nodes *)
-        let children = children |> List.map (fun child ->
+        let children = children |> Ls.map (fun child ->
           match child with
           | (_, E.File) -> G.children child g
           (* we prefer Package to Dir when we lookup, we don't want
@@ -39,7 +39,7 @@ let (lookup_fully_qualified2:
           *)
           | (_, E.Dir) -> []
           | _ -> [child]
-        ) |> List.flatten
+        ) |> Ls.flatten
         in
         (* sanity check, quite expansive according to -profile *)
         Common.group_assoc_bykey_eff children |> List.iter (fun (k, xs) ->

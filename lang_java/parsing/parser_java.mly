@@ -49,7 +49,7 @@ let void_type ii = named_type ("void", ii)
  * identifier followed by some type arguments.
  *)
 let (class_type: name_or_class_type -> class_type) = fun xs ->
-  xs |> List.map (function
+  xs |> Ls.map (function
   | Id x -> x, None
   | Id_then_TypeArgs (x, xs) -> x, Some xs
   | TypeArgs_then_Id _ -> raise Parsing.Parse_error
@@ -57,7 +57,7 @@ let (class_type: name_or_class_type -> class_type) = fun xs ->
 
 let (name: name_or_class_type -> expr) = fun xs ->
   let ys =
-    xs |> List.map (function
+    xs |> Ls.map (function
      | Id x -> None, x
      | Id_then_TypeArgs (x, xs) ->
       (* this is ok because of the ugly trick we do for Cast
@@ -71,7 +71,7 @@ let (name: name_or_class_type -> expr) = fun xs ->
      )
   in
   (* TODO: we should not discard the type information *)
-  let ys = ys |> List.map snd in
+  let ys = ys |> Ls.map snd in
 
   (* x.y.z -> Dot (Dot (NameId x, y), z) *)
   let ys = List.rev ys in
@@ -106,7 +106,7 @@ let fix_name arg =
    name arg
 
 let (qualified_ident: name_or_class_type -> qualified_ident) = fun xs ->
-  xs |> List.map (function
+  xs |> Ls.map (function
   | Id x -> x
   | Id_then_TypeArgs _ -> raise Parsing.Parse_error
   | TypeArgs_then_Id _ -> raise Parsing.Parse_error
@@ -117,10 +117,10 @@ let expr_to_typename expr =
 (*
     match expr with
     | Name name ->
-        TClass (name |> List.map (fun (xs, id) -> id, xs))
+        TClass (name |> Ls.map (fun (xs, id) -> id, xs))
     (* ugly, undo what was done in postfix_expression *)
     | Dot (Name name, _, id) ->
-        TClass ((name @ [[], id]) |> List.map (fun (xs, id) -> id, xs))
+        TClass ((name @ [[], id]) |> Ls.map (fun (xs, id) -> id, xs))
     | _ ->
         pr2 "cast_expression pb";
         pr2_gen expr;
@@ -305,13 +305,13 @@ goal: compilation_unit EOF  { $1 }
  *)
 compilation_unit:
   | package_declaration import_declaration+ type_declaration*
-    { [DirectiveStmt $1] @ ($2 |> List.map (fun x -> DirectiveStmt x)) @ List.flatten $3 }
+    { [DirectiveStmt $1] @ ($2 |> Ls.map (fun x -> DirectiveStmt x)) @ Ls.flatten $3 }
   | package_declaration                     type_declaration*
-    { [DirectiveStmt $1] @ List.flatten $2 }
+    { [DirectiveStmt $1] @ Ls.flatten $2 }
   |                     import_declaration+ type_declaration*
-    { ($1 |> List.map (fun x -> DirectiveStmt x)) @ List.flatten $2 }
+    { ($1 |> Ls.map (fun x -> DirectiveStmt x)) @ Ls.flatten $2 }
   |                                         type_declaration*
-    { List.flatten $1 }
+    { Ls.flatten $1 }
 
 declaration:
  | class_declaration      { Class $1 }
@@ -323,7 +323,7 @@ declaration:
 sgrep_spatch_pattern:
  | expression   EOF              { AExpr $1 }
  | item_no_dots EOF              { mk_stmt_or_stmts $1 }
- | item_no_dots item+ EOF        { mk_stmt_or_stmts ($1 @ (List.flatten $2)) }
+ | item_no_dots item+ EOF        { mk_stmt_or_stmts ($1 @ (Ls.flatten $2)) }
 
  | annotation EOF { AMod (Annotation $1, Common2.fst3 $1) }
 
@@ -744,7 +744,7 @@ lambda_parameters:
  | LP_LAMBDA ")"                       { [] }
 
 lambda_parameter_list:
- | listc(identifier)   { $1 |> List.map mk_param_id }
+ | listc(identifier)   { $1 |> Ls.map mk_param_id }
  | listc(lambda_param) { $1 }
 
 lambda_param:
@@ -834,7 +834,7 @@ statement_without_trailing_substatement:
  | ASSERT expression ";"                { Assert ($1, $2, None) }
  | ASSERT expression ":" expression ";" { Assert ($1, $2, Some $4) }
 
-block: "{" block_statement* "}"  { Block ($1, List.flatten $2, $3) }
+block: "{" block_statement* "}"  { Block ($1, Ls.flatten $2, $3) }
 
 block_statement:
  | local_variable_declaration_statement  { $1 }
@@ -843,7 +843,7 @@ block_statement:
  | class_declaration  { [DeclStmt (Class $1)] }
 
 local_variable_declaration_statement: local_variable_declaration ";"
-  { List.map (fun x -> LocalVar x) $1 }
+  { Ls.map (fun x -> LocalVar x) $1 }
 
 (* cant factorize with variable_modifier_opt, conflicts otherwise *)
 local_variable_declaration: modifiers_opt type_ listc(variable_declarator)
@@ -887,7 +887,7 @@ switch_block:
      { List.rev (($3, []) :: $2) }
 
 switch_block_statement_group: switch_label+ block_statement+
-  {$1, List.flatten $2}
+  {$1, Ls.flatten $2}
 
 switch_label:
  | CASE constant_expression ":"        { Case ($1, $2) }
@@ -1099,7 +1099,7 @@ super: EXTENDS type_ (* was class_type *)  { $2 }
 (* was interface_type_list *)
 interfaces: IMPLEMENTS listc(reference_type)   { $2 }
 
-class_body: "{" class_body_declaration* "}"  { $1, List.flatten $2, $3 }
+class_body: "{" class_body_declaration* "}"  { $1, Ls.flatten $2, $3 }
 
 (*----------------------------*)
 (* Class body *)
@@ -1179,7 +1179,7 @@ method_body:
  | ";"     { EmptyStmt $1 }
 
 throws: THROWS listc(name) (* was class_type_list *)
-  { List.map (fun x -> typ_of_qualified_id (qualified_ident x)) $2 }
+  { Ls.map (fun x -> typ_of_qualified_id (qualified_ident x)) $2 }
 
 generic_method_or_constructor_decl:
 |  modifiers_opt type_parameters type_
@@ -1211,9 +1211,9 @@ constructor_declarator: identifier "(" listc0(formal_parameter) ")" { $1, $3}
 
 constructor_body:
  | "{" block_statement* "}"
-    { Block ($1, List.flatten $2, $3) }
+    { Block ($1, Ls.flatten $2, $3) }
  | "{" explicit_constructor_invocation block_statement* "}"
-    { Block ($1, $2::(List.flatten $3), $4) }
+    { Block ($1, $2::(Ls.flatten $3), $4) }
 
 
 explicit_constructor_invocation:
@@ -1270,7 +1270,7 @@ extends_interfaces:
 (* Interface body *)
 (*----------------------------*)
 
-interface_body: "{" interface_member_declaration* "}" { $1, List.flatten $2,$3}
+interface_body: "{" interface_member_declaration* "}" { $1, Ls.flatten $2,$3}
 
 interface_member_declaration:
  | constant_declaration  { $1 }
@@ -1334,10 +1334,10 @@ enum_constant_bis:
  | identifier                         { $1, None, None }
  | identifier "(" listc0(argument) ")" { $1, Some ($2,$3,$4), None }
  | identifier "{" method_declaration* "}"
-    { $1, None, Some ($2, $3 |> List.map (fun x -> Method x) , $4) }
+    { $1, None, Some ($2, $3 |> Ls.map (fun x -> Method x) , $4) }
 
 enum_body_declarations:
- | ";" class_body_declaration* { List.flatten $2 }
+ | ";" class_body_declaration* { Ls.flatten $2 }
  | "..." { [DeclEllipsis $1] }
 
 (*************************************************************************)

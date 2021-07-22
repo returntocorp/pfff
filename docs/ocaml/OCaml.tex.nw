@@ -494,7 +494,7 @@ Amazing debugger. Can go back in time.
 %  explain why this syntax. Because save space :) no (,,,). If
 % function and funcall matters more than if/do/while, then optimize
 % the syntax, and also allow for partial application ! and code like
-% List.map (fff "xxx") [...],  section, etc (pointwise programming a la FP)
+% Ls.map (fff "xxx") [...],  section, etc (pointwise programming a la FP)
 
 \chapter{Coding style}
 

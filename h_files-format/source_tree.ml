@@ -19,9 +19,9 @@ let dirfinal_of_dir s =
 
 
 let all_subsystem reorg =
-  reorg |> List.map fst |> List.map string_of_subsystem
+  reorg |> Ls.map fst |> Ls.map string_of_subsystem
 let all_dirs reorg =
-  reorg |> List.map snd |> List.concat |> List.map string_of_dir
+  reorg |> Ls.map snd |> Ls.concat |> Ls.map string_of_dir
 
 let reverse_index reorg =
   let res = ref [] in
@@ -38,8 +38,8 @@ let reverse_index reorg =
 let (load_tree_reorganization : Common.filename -> tree_reorganization) =
   fun file ->
   let xs = Simple_format.title_colon_elems_space_separated file in
-  xs |> List.map (fun (title, elems) ->
-    SubSystem title, elems |> List.map (fun s -> Dir s)
+  xs |> Ls.map (fun (title, elems) ->
+    SubSystem title, elems |> Ls.map (fun s -> Dir s)
   )
 
 let debug_source_tree = false
@@ -88,11 +88,11 @@ let (change_organization:
 
   let subsystem_bools =
     all_subsystem reorg
-    |> List.map (fun s -> (Sys.file_exists (Filename.concat dir s)))
+    |> Ls.map (fun s -> (Sys.file_exists (Filename.concat dir s)))
   in
   let dirs_bools =
     all_dirs reorg
-    |> List.map (fun s -> (Sys.file_exists (Filename.concat dir s)))
+    |> Ls.map (fun s -> (Sys.file_exists (Filename.concat dir s)))
   in
   match () with
   | _ when Common2.and_list subsystem_bools ->
@@ -110,7 +110,7 @@ let subsystem_of_dir2 (Dir dir) reorg  =
   let index = reverse_index reorg in
   let dirsplit = Common.split "/" dir in
   let index =
-    index |> List.map (fun (Dir d, sub) -> Common.split "/" d, sub)
+    index |> Ls.map (fun (Dir d, sub) -> Common.split "/" d, sub)
   in
   try
     index |> List.find (fun (dirsplit2, _sub) ->

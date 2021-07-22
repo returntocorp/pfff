@@ -77,7 +77,7 @@ let ws_re = Str.regexp "[ \t\r\n]+"
 
 let split_single_string_to_array str pos =
   let chunks =
-    List.map (fun chunk -> Str.split ws_re chunk)
+    Ls.map (fun chunk -> Str.split ws_re chunk)
       (Str.split_delim bslash_spc_re str)
   in
   let strings =
@@ -96,7 +96,7 @@ let split_single_string_to_array str pos =
           reduce (rest_rev @ ((acc_h ^ " " ^ first)::acc_t)) chunks_t
     in reduce [] chunks
   in
-  let strings = List.map
+  let strings = Ls.map
       (fun s -> Literal(String(Single (s, pos)))) strings
   in
   Array(pos, strings,pos) (* TODO pos1 *)
@@ -452,7 +452,7 @@ let wrap xs f =
   match xs with
   | [] -> failwith "Impossible: Empty list in merge"
   | (x,gd,od)::rest ->
-      let l = x::(List.map (fun (x, _, _) -> x) rest ) in
+      let l = x::(Ls.map (fun (x, _, _) -> x) rest ) in
       f l, gd, od
 
 

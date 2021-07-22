@@ -46,7 +46,7 @@ val group_by_mapped_key: ('a -> 'b) -> 'a list -> ('b * 'a list) list
 val group_and_count: 'a list -> ('a * int) list
 
 (* Use hash internally to not be in O(n2). If you want to use it on a
- * simple list, then first do a List.map to generate a key, for instance the
+ * simple list, then first do a Ls.map to generate a key, for instance the
  * first char of the element, and then use this function.
  *)
 val group_assoc_bykey_eff : ('a * 'b) list -> ('a * 'b list) list

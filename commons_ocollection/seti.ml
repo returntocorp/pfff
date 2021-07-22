@@ -37,7 +37,7 @@ let invariant xs =
 
 let string_of_seti xs =
   "[" ^
-  join "," (xs |> List.rev |> List.map (function
+  join "," (xs |> List.rev |> Ls.map (function
     | (Exact i) -> string_of_int i
     | (Interv (i,j)) -> Printf.sprintf "%d - %d" i j)) ^
   "]"
@@ -327,8 +327,8 @@ let rec debug = function
 
 (*****************************************************************************)
 (* if operation return wrong result, then may later have to patch them *)
-let patch1 xs = List.map exactize xs
-let patch2 xs = xs |> List.map (fun e ->
+let patch1 xs = Ls.map exactize xs
+let patch2 xs = xs |> Ls.map (fun e ->
   match e with
   | Interv (i,j) when i > j && i =|= j+1 ->
       let _ = pr2 (spf "i = %d, j = %d" i j) in

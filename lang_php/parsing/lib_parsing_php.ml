@@ -250,13 +250,13 @@ let get_vars_any any =
 
 (*
 let top_statements_of_program ast =
-  ast |> List.map (function
+  ast |> Ls.map (function
   | StmtList xs -> xs
   | FinalDef _|NotParsedCorrectly _
   | ClassDef _| FuncDef _ | ConstantDef _ | TypeDef _
   | NamespaceDef _ | NamespaceBracketDef _ | NamespaceUse _
       -> []
-  ) |> List.flatten
+  ) |> Ls.flatten
 
 (* We often do some analysis on "unit" of code like a function,
  * a method, or toplevel statements. One can not use the

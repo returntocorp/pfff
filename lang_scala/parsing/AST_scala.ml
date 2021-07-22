@@ -591,8 +591,8 @@ type any =
 
 let empty_cparents = { cextends = None; cwith = [] }
 
-let attrs_of_mods xs = List.map (fun x -> M x) xs
-let attrs_of_annots xs = List.map (fun x -> A x) xs
+let attrs_of_mods xs = Ls.map (fun x -> M x) xs
+let attrs_of_annots xs = Ls.map (fun x -> A x) xs
 let mods_with_annots mods annots = attrs_of_annots annots @ attrs_of_mods mods
 
 let is_variable_name s =

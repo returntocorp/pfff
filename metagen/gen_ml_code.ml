@@ -73,15 +73,15 @@ let (gen_matcher: string * OCaml.t -> unit) = fun (s, t) ->
       | O.Sum xs ->
           xs |> List.iter (fun (s, args) ->
 
-            let aa = Common.index_list_1 args |> List.map (fun (t, i) ->
+            let aa = Common.index_list_1 args |> Ls.map (fun (t, i) ->
               spf "a%d" i, t
             ) in
-            let bb = Common.index_list_1 args |> List.map (fun (t, i) ->
+            let bb = Common.index_list_1 args |> Ls.map (fun (t, i) ->
               spf "b%d" i, t
             ) in
 
-            let aas = aa |> List.map fst |> parenize_and_comma in
-            let bbs = bb |> List.map fst |> parenize_and_comma in
+            let aas = aa |> Ls.map fst |> parenize_and_comma in
+            let bbs = bb |> Ls.map fst |> parenize_and_comma in
             e+= "| A.%s%s, B.%s%s ->" $ s $ aas $ s $ bbs;
             e --> (fun e ->
               (* ... *)
@@ -110,15 +110,15 @@ let (gen_matcher: string * OCaml.t -> unit) = fun (s, t) ->
 
       (* TODO factorize code ? a tuple is a kind of anon single constructor *)
       | O.Tuple args ->
-          let aa = Common.index_list_1 args |> List.map (fun (t, i) ->
+          let aa = Common.index_list_1 args |> Ls.map (fun (t, i) ->
             spf "a%d" i, t
           ) in
-          let bb = Common.index_list_1 args |> List.map (fun (t, i) ->
+          let bb = Common.index_list_1 args |> Ls.map (fun (t, i) ->
             spf "b%d" i, t
           ) in
 
-          let aas = aa |> List.map fst |> parenize_and_comma in
-          let bbs = bb |> List.map fst |> parenize_and_comma in
+          let aas = aa |> Ls.map fst |> parenize_and_comma in
+          let bbs = bb |> Ls.map fst |> parenize_and_comma in
           e+= "| %s, %s ->" $ aas $ bbs;
           e --> (fun e ->
             (* ... *)
@@ -146,10 +146,10 @@ let (gen_matcher: string * OCaml.t -> unit) = fun (s, t) ->
           e += "(a, b) -> %s a b" $ (call_to_matcher (O.Apply (x,y)))
 
       | O.Dict xs ->
-          let aa = Common.index_list_1 xs |> List.map (fun (t, i) ->
+          let aa = Common.index_list_1 xs |> Ls.map (fun (t, i) ->
             spf "a%d" i, t
           ) in
-          let bb = Common.index_list_1 xs |> List.map (fun (t, i) ->
+          let bb = Common.index_list_1 xs |> Ls.map (fun (t, i) ->
             spf "b%d" i, t
           ) in
 

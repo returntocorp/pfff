@@ -45,7 +45,7 @@ let parse_outline ?(outline_regexp=outline_default_regexp) file =
 
   (* just differentiate outline lines from regular lines *)
   let headers_or_not =
-    xs |> List.map (fun s ->
+    xs |> Ls.map (fun s ->
       if s =~ outline_regexp
       then
         let (stars, line) = extract_outline_line ~outline_regexp s in

@@ -64,21 +64,21 @@ let gen_rank_heatmap_layer g hentity_to_rank  ~output =
     )
     |> Common.group_assoc_bykey_eff
   in
-  let xs = hentity_to_rank |> Common.hash_to_list |> List.map snd in
+  let xs = hentity_to_rank |> Common.hash_to_list |> Ls.map snd in
   let max_total = Common2.maximum xs in
 
   let layer = { Layer_code.
                 title = spf "Graph code rank (%s)" (Filename.basename output);
                 description = "Associate a rank to each entity according to its depth
 in the Use graph";
-                files = group_by_file |> List.map (fun (file, nodes_and_rank) ->
+                files = group_by_file |> Ls.map (fun (file, nodes_and_rank) ->
                   let max_file =
-                    nodes_and_rank |> List.map snd |> Common2.maximum
+                    nodes_and_rank |> Ls.map snd |> Common2.maximum
                   in
 
                   file,
                   { Layer_code.
-                    micro_level = nodes_and_rank |> List.map (fun (n, v) ->
+                    micro_level = nodes_and_rank |> Ls.map (fun (n, v) ->
                       let info = G.nodeinfo n g in
                       let line = info.Graph_code.pos.Parse_info.line in
                       line, kind_of_rank v ~max_total
@@ -116,15 +116,15 @@ let gen_statistics_layer ~root stats ~output =
 
   let infos =
     (!(stats.G.unresolved_calls)
-     |> List.map (fun x -> x, "unresolved calls")) @
+     |> Ls.map (fun x -> x, "unresolved calls")) @
     (!(stats.G.unresolved_class_access)
-     |> List.map (fun x -> x, "unresolved class access")) @
+     |> Ls.map (fun x -> x, "unresolved class access")) @
     (!(stats.G.field_access)
-     |> List.map (fun (x, b) -> x, pre b "field access")) @
+     |> Ls.map (fun (x, b) -> x, pre b "field access")) @
     (!(stats.G.method_calls)
-     |> List.map (fun (x, b) -> x, pre b "method calls")) @
+     |> Ls.map (fun (x, b) -> x, pre b "method calls")) @
     (!(stats.G.lookup_fail)
-     |> List.map (fun (x, (_str, _kind)) -> x, "lookup fail")) @
+     |> Ls.map (fun (x, (_str, _kind)) -> x, "lookup fail")) @
 
     []
   in

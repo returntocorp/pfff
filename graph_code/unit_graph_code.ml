@@ -227,20 +227,20 @@ public function foo() { }
         let children = Graphe.succ node dag in
         assert_equal ~msg:"it should find the direct children of a class"
           ["B"]
-          (children |> List.map fst);
+          (children |> Ls.map fst);
 
         let dag = Graph_code_class_analysis.class_hierarchy g in
         let hmethods = Graph_code_class_analysis.toplevel_methods g dag in
         let xs = Hashtbl.find_all hmethods "foo" in
         assert_equal ~msg:"it should find the toplevel methods"
           ["C.foo";"A.foo"]
-          (xs |> List.map fst);
+          (xs |> Ls.map fst);
 
         let node = ("A.foo", E.Method) in
         let methods = Graph_code_class_analysis.dispatched_methods g dag node in
         assert_equal ~msg:"it should find the dispatched methods"
           ["B.foo"]
-          (methods |> List.map fst);
+          (methods |> Ls.map fst);
       );
     ];
 

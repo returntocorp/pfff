@@ -25,7 +25,7 @@ let test_tokens_python file =
 
 (*s: function [[Test_parsing_python.test_parse_python_common]] *)
 let test_parse_python_common parsing_mode xs =
-  let xs = List.map Common.fullpath xs in
+  let xs = Ls.map Common.fullpath xs in
 
   let fullxs =
     Lib_parsing_python.find_source_files_of_dir_or_files xs

@@ -105,7 +105,7 @@ let test_dump_cpp_view file =
       Token_helpers_cpp.is_eof x
     )
   in
-  let extended = toks |> List.map Token_views_cpp.mk_token_extended in
+  let extended = toks |> Ls.map Token_views_cpp.mk_token_extended in
   Parsing_hacks_cpp.find_template_inf_sup extended;
 
   let multi = Token_views_cpp.mk_multi extended in

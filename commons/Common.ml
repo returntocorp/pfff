@@ -213,11 +213,11 @@ let rec dump2 r =
     (* From the tag, determine the type of block. *)
     if is_list r then ( (* List. *)
       let fields = get_list r in
-      "[" ^ String.concat "; " (List.map dump2 fields) ^ "]"
+      "[" ^ String.concat "; " (Ls.map dump2 fields) ^ "]"
     )
     else if t = 0 then (		(* Tuple, array, record. *)
       let fields = get_fields [] s in
-      "(" ^ String.concat ", " (List.map dump2 fields) ^ ")"
+      "(" ^ String.concat ", " (Ls.map dump2 fields) ^ ")"
     )
 
     (* Note that [lazy_tag .. forward_tag] are < no_scan_tag.  Not
@@ -233,7 +233,7 @@ let rec dump2 r =
        * out the ID and the slots.
       *)
       "Object #" ^ dump2 id ^
-      " (" ^ String.concat ", " (List.map dump2 slots) ^ ")"
+      " (" ^ String.concat ", " (Ls.map dump2 slots) ^ ")"
     )
     else if t = infix_tag then opaque "infix"
     else if t = forward_tag then opaque "forward"
@@ -241,7 +241,7 @@ let rec dump2 r =
     else if t < no_scan_tag then (	(* Constructed value. *)
       let fields = get_fields [] s in
       "Tag" ^ string_of_int t ^
-      " (" ^ String.concat ", " (List.map dump2 fields) ^ ")"
+      " (" ^ String.concat ", " (Ls.map dump2 fields) ^ ")"
     )
     else if t = string_tag then (
       "\"" ^ String.escaped (magic r : string) ^ "\""
@@ -570,16 +570,16 @@ type cmdline_actions = action_spec list
 exception WrongNumberOfArguments
 
 let options_of_actions action_ref actions =
-  actions |> List.map (fun (key, doc, _func) ->
+  actions |> Ls.map (fun (key, doc, _func) ->
     (key, (Arg.Unit (fun () -> action_ref := key)), doc)
   )
 
 let (action_list: cmdline_actions -> Arg.key list) = fun xs ->
-  List.map (fun (a,_b,_c) -> a) xs
+  Ls.map (fun (a,_b,_c) -> a) xs
 
 let (do_action: Arg.key -> string list (* args *) -> cmdline_actions -> unit) =
   fun key args xs ->
-  let assoc = xs |> List.map (fun (a,_b,c) -> (a,c)) in
+  let assoc = xs |> Ls.map (fun (a,_b,c) -> (a,c)) in
   let action_func = List.assoc key assoc in
   action_func args
 
@@ -1149,27 +1149,8 @@ let erase_this_temp_file f =
 (* List *)
 (*****************************************************************************)
 
-(* Safe implementation that prevents stack overflows. *)
-let map f xs =
-  (* Since map is such a frequently used function we try to make it fast for
-   * small/medium-sized lists. Inspired by Jane Street's Base library. *)
-  let max_rec_count = 1000 in
-  let rec count_map i = function
-    | [] -> []
-    | x1::[] -> f x1 :: []
-    | x1::x2::[] -> f x1 :: f x2 :: []
-    | x1::x2::x3::xs ->
-        let ys =
-          if i <= max_rec_count then
-            count_map (i+1) xs
-          else
-            xs
-            |> List.rev_map f
-            |> List.rev
-        in
-        f x1 :: f x2 :: f x3 :: ys
-  in
-  count_map 0 xs
+(* Safe and fast implementation that prevents stack overflows. *)
+let map = Ls.map
 
 let exclude p xs =
   List.filter (fun x -> not (p x)) xs
@@ -1247,7 +1228,7 @@ let index_list xs =
 let index_list_0 xs = index_list xs
 
 let index_list_1 xs =
-  xs |> index_list |> List.map (fun (x,i) -> x, i+1)
+  xs |> index_list |> Ls.map (fun (x,i) -> x, i+1)
 
 let sort_prof a b =
   profile_code "Common.sort_by_xxx" (fun () -> List.sort a b)
@@ -1309,11 +1290,11 @@ type 'a hashset = ('a, bool) Hashtbl.t
 (* with sexp *)
 
 let hashset_to_list h =
-  hash_to_list h |> List.map fst
+  hash_to_list h |> Ls.map fst
 
 (* old: slightly slower?
  * let hashset_of_list xs =
- *   xs +> List.map (fun x -> x, true) +> hash_of_list
+ *   xs +> Ls.map (fun x -> x, true) +> hash_of_list
 *)
 let hashset_of_list (xs: 'a list) : ('a, bool) Hashtbl.t =
   let h = Hashtbl.create (List.length xs) in
@@ -1329,7 +1310,7 @@ let group_assoc_bykey_eff2 xs =
   let h = Hashtbl.create 101 in
   xs |> List.iter (fun (k, v) -> Hashtbl.add h k v);
   let keys = hkeys h in
-  keys |> List.map (fun k -> k, Hashtbl.find_all h k)
+  keys |> Ls.map (fun k -> k, Hashtbl.find_all h k)
 
 let group_assoc_bykey_eff xs =
   profile_code "Common.group_assoc_bykey_eff" (fun () ->
@@ -1456,7 +1437,7 @@ let grep_dash_v_str =
   "| grep -v /.svn/ | grep -v .git_annot | grep -v .marshall"
 
 let files_of_dir_or_files_no_vcs_nofilter xs =
-  xs |> List.map (fun x ->
+  xs |> Ls.map (fun x ->
     if is_directory x
     then
       (* todo: should escape x *)
@@ -1473,7 +1454,7 @@ let files_of_dir_or_files_no_vcs_nofilter xs =
                                   cmd (String.concat "\n" xs))))
       )
     else [x]
-  ) |> List.concat
+  ) |> Ls.concat
 
 
 (*****************************************************************************)

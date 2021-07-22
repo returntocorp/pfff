@@ -43,7 +43,7 @@ let v_semicolon_list = xxx_list
 let v_comma_list = xxx_list
 let v_and_list = xxx_list
 
-let v_list = List.map
+let v_list = Ls.map
 
 let v_string x = x
 
@@ -62,7 +62,7 @@ and v_name = function
 and v_long_name (v1, v2) =
   let v1 = v_qualifier v1 and v2 = v_name v2 in v1, v2
 and v_qualifier v =
-    v |> List.map (fun (v1, v2) -> let v1 = v_name v1 and _v2 = v_tok v2 in v1)
+    v |> Ls.map (fun (v1, v2) -> let v1 = v_name v1 and _v2 = v_tok v2 in v1)
 
 
 and v_todo_category x = v_wrap v_string x
@@ -168,10 +168,10 @@ and v_expr v =
       and v3 = v_expr v3
       in A.Infix (v1, v2, v3)
   | FunCallSimple ((v1, v2)) ->
-      let v1 = v_long_name v1 and v2 = List.map v_argument v2 in
+      let v1 = v_long_name v1 and v2 = Ls.map v_argument v2 in
       A.Call (A.Name v1, v2)
   | FunCall ((v1, v2)) ->
-      let v1 = v_expr v1 and v2 = List.map v_argument v2 in
+      let v1 = v_expr v1 and v2 = Ls.map v_argument v2 in
       A.Call (v1, v2)
   | RefAccess ((v1, v2)) -> let v1 = v_tok v1 and v2 = v_expr v2 in
                             A.RefAccess (v1, v2)
@@ -205,7 +205,7 @@ and v_expr v =
       in
       A.LetIn (v1, v3, v5, v2)
   | Fun ((v1, v2, _t, v3)) ->
-      let v2 = List.map v_parameter v2 in
+      let v2 = Ls.map v_parameter v2 in
       let v3 = v_expr v3 in
       A.Fun (v1, v2, v3)
   | Function ((v1, v2)) ->
@@ -418,7 +418,7 @@ and
               l_body = v_l_body
             } ->
   let v1 = v_name v_l_name in
-  let v2 = List.map v_labeled_simple_pattern v_l_args in
+  let v2 = Ls.map v_labeled_simple_pattern v_l_args in
   let _v3 = v_tok v_l_tok in
   let v4 = v_seq_expr1 v_l_body in
   { A.lname = v1; lparams = v2; lbody = v4 }
@@ -430,7 +430,7 @@ and v_module_expr v =
       A.ModuleName v1
   | ModuleStruct (v1, v2, v3) ->
       let _v1 = v_tok v1 in
-      let v2 = List.map v_item v2 in
+      let v2 = Ls.map v_item v2 in
       let _v3 = v_tok v3 in
       A.ModuleStruct v2
   | ModuleTodo (t, xs) ->
@@ -455,7 +455,7 @@ and v_item x =
       and _v3 = v_tok v3
       and v4 = v_ty v4
       and _v5 = v_tok v5
-      and v6 = List.map (v_wrap v_string) v6
+      and v6 = Ls.map (v_wrap v_string) v6
       in
       A.External (v1, v2, v4, v6)
   | Open ((v1, v2)) -> let v1 = v_tok v1 and v2 = v_long_name v2 in
@@ -499,7 +499,7 @@ and v_toplevel x =
           [A.LetPattern (A.PatUnderscore (fake_info()), v1)])]
   | TopDirective v1 -> let _v1 = v_info v1 in []
 
-and program v = List.map v_toplevel v |> List.flatten
+and program v = Ls.map v_toplevel v |> Ls.flatten
 
 and any = function
   | Expr v1 -> let v1 = v_expr v1 in A.E v1

@@ -41,4 +41,4 @@ let string_of_t x =
   Common.spf "state = %s, stack = [%s]"
     (string_of_state x.state)
     (x.lexer_stack |> Stack.to_seq |> List.of_seq
-     |> List.map fst |> String.concat ",")
+     |> Ls.map fst |> String.concat ",")

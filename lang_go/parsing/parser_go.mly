@@ -51,7 +51,7 @@ let condition_of_stmt tok stmt =
 
 let mk_else elseifs else_ =
   let elseifs = List.rev elseifs in
-  List.fold_right (fun elseif accu ->
+  Ls.fold_right (fun elseif accu ->
       let ((tok, stopt, cond), body) = elseif in
       Some (If (tok, stopt, cond, body, accu))
   ) elseifs else_
@@ -106,7 +106,7 @@ let adjust_signatures params =
       | x::xs ->
         (match x with
           | ParamClassic { pname = Some _; ptype = t; _ } ->
-             ((acc |> List.rev |> List.map (fun id ->
+             ((acc |> List.rev |> Ls.map (fun id ->
                ParamClassic { pname = Some id; ptype = t; pdots = None })) @
                [x]) @
                aux [] xs
@@ -287,7 +287,7 @@ listsc_t(X): list_sep_term(X, ";") { $1 }
 (*************************************************************************)
 
 file: package ";" imports xdcl_list EOF
-  { ($1)::($3 |> List.map (fun x -> Import x)) @ (List.rev $4) }
+  { ($1)::($3 |> Ls.map (fun x -> Import x)) @ (List.rev $4) }
 
 package: LPACKAGE sym { Package ($1, $2) }
 
@@ -327,7 +327,7 @@ partial:
 
 item:
  | stmt   { [IStmt $1] }
- | import { $1 |> List.map (fun x -> IImport x) }
+ | import { $1 |> Ls.map (fun x -> IImport x) }
  | package { [ITop $1] }
  | xfndcl { [ITop $1] }
 
@@ -343,7 +343,7 @@ import:
 |   LIMPORT import_stmt
       { [$2 $1] }
 |   LIMPORT "(" listsc_t(import_stmt) ")"
-      {List.map (fun f -> f $1) $3 }
+      {Ls.map (fun f -> f $1) $3 }
 |   LIMPORT "(" ")" { [] }
 
 import_stmt:
@@ -362,12 +362,12 @@ import_stmt:
 (*************************************************************************)
 
 xdcl:
-|   common_dcl { $1 |> List.map (fun decl -> DTop decl) }
+|   common_dcl { $1 |> Ls.map (fun decl -> DTop decl) }
 |   xfndcl     { [$1] }
 
 common_dcl:
 |   LVAR vardcl                   { $2 }
-|   LVAR "(" listsc_t(vardcl) ")" { List.flatten $3 }
+|   LVAR "(" listsc_t(vardcl) ")" { Ls.flatten $3 }
 |   LVAR "(" ")"                  { [] }
 
     (* at least the first const has a value *)
@@ -681,10 +681,10 @@ pseudocall:
 |   pexpr "(" ")"
       { ($1, ($2,[],$3)) }
 |   pexpr "(" arguments ","? ")"
-      { ($1, ($2, $3 |> List.rev |> List.map mk_arg, $5)) }
+      { ($1, ($2, $3 |> List.rev |> Ls.map mk_arg, $5)) }
 |   pexpr "(" arguments "..." ","? ")"
       { let args =
-          match $3 |> List.map mk_arg with
+          match $3 |> Ls.map mk_arg with
           | [] -> raise Impossible
           | (Arg e)::xs -> List.rev ((ArgDots (e, $4))::xs)
           | (ArgDots _)::_ -> raise Impossible
@@ -909,13 +909,13 @@ non_expr_type:
 
 structtype:
 |   LSTRUCT lbrace listsc_t(structdcl) "}"
-    { TStruct ($1, ($2, List.flatten $3, $4)) }
+    { TStruct ($1, ($2, Ls.flatten $3, $4)) }
 |   LSTRUCT lbrace "}"
     { TStruct ($1, ($2, [], $3)) }
 
 structdcl:
 |   listc(new_name) ntype LSTR?
-    { $1 |> List.map (fun id -> Field (id, $2), $3) }
+    { $1 |> Ls.map (fun id -> Field (id, $2), $3) }
 |       packname      LSTR? { [EmbeddedField (None, $1), $2] }
 |   "*" packname      LSTR? { [EmbeddedField (Some $1, $2), $3] }
 (* sgrep-ext: *)

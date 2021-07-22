@@ -117,7 +117,7 @@ let main_action xs =
   Logger.log Config_pfff.logger "stags" None;
 
   (* This can augment the size of the tags file
-     let xs = List.map relative_to_absolute xs in
+     let xs = Ls.map relative_to_absolute xs in
   *)
   let tags_file =
     (*

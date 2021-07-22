@@ -684,12 +684,12 @@ let build_var kwd (id_or_pat, ty_opt, initopt) =
   | Right pat ->
       var_pattern_to_var kwd pat (snd kwd) initopt
 
-let build_vars kwd vars = vars |> List.map (build_var kwd)
+let build_vars kwd vars = vars |> Ls.map (build_var kwd)
 
 let vars_to_defs xs =
-  xs |> List.map (fun (ent, v) -> (ent, VarDef v))
+  xs |> Ls.map (fun (ent, v) -> (ent, VarDef v))
 let vars_to_stmts xs =
-  xs |> vars_to_defs |> List.map (fun x -> DefStmt x)
+  xs |> vars_to_defs |> Ls.map (fun x -> DefStmt x)
 
 (*
    Left-handside patterns and function parameters happen to use the same
@@ -730,7 +730,7 @@ let add_decorators_to_declaration decorators declaration =
   ({ ent with attrs = ent.attrs @ decorators }, defkind)
 
 let add_decorators_to_declarations decorators declarations =
-  List.map (add_decorators_to_declaration decorators) declarations
+  Ls.map (add_decorators_to_declaration decorators) declarations
 
 (*****************************************************************************)
 (* Helpers, could also be put in lib_parsing.ml instead *)

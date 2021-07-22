@@ -35,7 +35,7 @@ let tags_of_files_or_dirs ?(verbose=false) xs =
   let files = Lib_parsing_js.find_source_files_of_dir_or_files xs in
 
   files |> Console.progress ~show:verbose (fun k ->
-    List.map (fun file ->
+    Ls.map (fun file ->
       k();
 
       let res =
@@ -55,7 +55,7 @@ let tags_of_files_or_dirs ?(verbose=false) xs =
       let tags_classes =
         hcomplete_name_of_info
         |> Common.hash_to_list
-        |> List.map (fun (info, (entity_kind, str)) ->
+        |> Ls.map (fun (info, (entity_kind, str)) ->
           let str' =
             (* we standardize static vs member methods in class_js
              * for the light_db database building, but

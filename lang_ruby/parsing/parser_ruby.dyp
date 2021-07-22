@@ -159,7 +159,7 @@ let rec param_to_pattern = function
   | ParamEllipsis _ -> raise Common.Impossible
 
 and params_to_pattern xs =
-  let xs = List.map param_to_pattern xs in
+  let xs = Ls.map param_to_pattern xs in
   Tuple xs
 }
 

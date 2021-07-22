@@ -4,7 +4,7 @@ type entity_id = int
 
 type entity = {
   e_kind: entity_kind;
-  (* needs to be a shortname, e.g. "map", not "List.map", otherwise the
+  (* needs to be a shortname, e.g. "map", not "Ls.map", otherwise the
    * highlighter (which uses only a lexer/parser) will not enlarge the
    * corresponding token in the file.
   *)

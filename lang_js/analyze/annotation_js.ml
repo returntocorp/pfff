@@ -44,7 +44,7 @@ type annotation =
  * comment esthetic prefix mark), so the line-based approach may be better.
 *)
 let extract_annotations str =
-  let lines = Common2.lines str |> List.map Comment_js.strip_comment_marks in
+  let lines = Common2.lines str |> Ls.map Comment_js.strip_comment_marks in
   lines |> Common2.map_flatten (fun str ->
     match () with
     | _ when str =~ "@providesModule[ \t]+\\([A-Za-z-_0-9]+\\)" ->
@@ -53,7 +53,7 @@ let extract_annotations str =
         [ProvidesLegacy (Common.matched1 str)]
     | _ ->
         let xs = Common2.all_match "\\(@[A-Za-z-]+\\)" str in
-        xs |> List.map (function
+        xs |> Ls.map (function
           | "@runWhenReady" -> RunWhenReady
           | s -> Other s
         )
@@ -71,7 +71,7 @@ let extract_annotations str =
  * would require to lex the comment.
 *)
 let annotations_of_program_with_comments { Parse_info. tokens = toks; _} =
-  toks |> List.map (function
+  toks |> Ls.map (function
     | Parser_js.TComment tok ->
         let s = Parse_info.str_of_info tok in
         let annots = extract_annotations s in
@@ -83,6 +83,6 @@ let annotations_of_program_with_comments { Parse_info. tokens = toks; _} =
          * be good enough to locate the annotation when we
          * do checks related to annotations or for tags.
         *)
-        annots |> List.map (fun annot -> annot, tok)
+        annots |> Ls.map (fun annot -> annot, tok)
     | _ -> []
-  ) |> List.flatten
+  ) |> Ls.flatten

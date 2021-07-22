@@ -69,14 +69,14 @@ let rec xhp expr x =
   match x with
   | C.XhpSingleton (tag, attrs, _tok) ->
     let id = id_of_tag tag in
-    let args1 = List.map (xhp_attribute expr) attrs in
+    let args1 = Ls.map (xhp_attribute expr) attrs in
     let args2 = [] in
     (* TODO: is it the actual result? good enough for codegraph for now *)
     A.Apply(id, fake_bracket [A.Arr (fake_bracket args1); A.Arr (fake_bracket args2)])
   | C.Xhp (tag, attrs, _tok, body, _endtag_opt) ->
     let id = id_of_tag tag in
-    let args1 = List.map (xhp_attribute expr) attrs in
-    let args2 = List.map (xhp_body expr) body in
+    let args1 = Ls.map (xhp_attribute expr) attrs in
+    let args2 = Ls.map (xhp_body expr) body in
     A.Apply (id, fake_bracket [A.Arr (fake_bracket args1); A.Arr (fake_bracket args2)])
 and xhp_body expr x =
   match x with
@@ -151,7 +151,7 @@ let rec compile_pattern_inner ((expr, fname, fpname) as context) varexpr pat =
   match pat with
   (* 'var { x, y } = varexpr'  -~> 'var x = varexpr.x; var y = varexpr.y;' *)
   | C.PatObj x ->
-    x |> C.unbrace |> C.uncomma |> List.map (compile_object_element_pattern context varexpr) |> List.flatten
+    x |> C.unbrace |> C.uncomma |> Ls.map (compile_object_element_pattern context varexpr) |> Ls.flatten
   (* 'var [x,y] = varexpr' -~> 'var x = varexpr[0]; var y = varexpr[1] *)
   | C.PatArr x ->
     let xs = x |> C.unbrace in
@@ -320,7 +320,7 @@ let forof (lhs_var, tok, e2, st) (expr, stmt, var_binding) =
             then failwith "for-of loop variable can not have an initializer";
             C.VarPattern { x with C.vpat_init = Some (tok, step_value_cst) }
       in
-      var_binding vkind binding |> List.map (fun var -> A.DefStmt var)
+      var_binding vkind binding |> Ls.map (fun var -> A.DefStmt var)
   in
   let finalst = vars_or_assign_stmts @ st  in
   [A.For (fake "for", A.ForClassic (for_init, Some for_cond, None),

@@ -56,7 +56,7 @@ let defs_of_files_or_dirs ?(verbose=false) xs =
   let files = Lib_parsing_ml.find_source_files_of_dir_or_files xs in
 
   files |> Console.progress ~show:verbose (fun k ->
-    List.map (fun file ->
+    Ls.map (fun file ->
       k();
       let (_ast, toks) =
         try

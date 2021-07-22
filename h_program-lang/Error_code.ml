@@ -416,7 +416,7 @@ let try_with_print_exn_and_exit_fast file f =
 
 
 let adjust_paths_relative_to_root root errs =
-  errs |> List.map (fun e ->
+  errs |> Ls.map (fun e ->
     let file = e.loc.PI.file in
     let file' = Common.filename_without_leading_path root file in
     { e with loc = { e.loc with PI.file = file' } }
@@ -518,7 +518,7 @@ let (expected_error_lines_of_files:
        ?regexp:string ->
      Common.filename list -> (Common.filename * int (* line *)) list) =
   fun ?(regexp=default_error_regexp) test_files ->
-  test_files |> List.map (fun file ->
+  test_files |> Ls.map (fun file ->
     Common.cat file |> Common.index_list_1 |> Common.map_filter
       (fun (s, idx) ->
          (* Right now we don't care about the actual error messages. We
@@ -530,11 +530,11 @@ let (expected_error_lines_of_files:
          then Some (file, idx + 1)
          else None
       )
-  ) |> List.flatten
+  ) |> Ls.flatten
 
 let compare_actual_to_expected actual_errors expected_error_lines =
   let actual_error_lines =
-    actual_errors |> List.map (fun err ->
+    actual_errors |> Ls.map (fun err ->
       let loc = err.loc in
       loc.PI.file, loc.PI.line
     )

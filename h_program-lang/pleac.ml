@@ -72,7 +72,7 @@ let parse_data_file file =
   file
   |> Common.cat
   |> Common2.split_list_regexp regexp_section_pleac_data |> skip_no_heading
-  |> List.map (fun (s, group) ->
+  |> Ls.map (fun (s, group) ->
     if s =~ regexp_section_pleac_data
     then
       let (_, section, _) = Common.matched3 s in
@@ -109,14 +109,14 @@ let parse_skeleton_file file =
   file
   |> Common.cat
   |> Common2.split_list_regexp regexp_skeleton_section1 |> skip_no_heading
-  |> List.map (fun (s, group) ->
+  |> Ls.map (fun (s, group) ->
     if s =~ regexp_skeleton_section1
     then
       let section1 = Common.matched1 s in
       section1,
       group
       |> Common2.split_list_regexp regexp_skeleton_section2 |> skip_no_heading
-      |> List.map (fun (s2, group) ->
+      |> Ls.map (fun (s2, group) ->
         if s2 =~ regexp_skeleton_section2
         then
           let section2 = Common.matched1 s2 in

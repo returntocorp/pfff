@@ -208,7 +208,7 @@ let build ?(verbose=true) root files =
     files
     |> Common.group_by_mapped_key (fun f -> Common2.basename f)
     |> List.filter (fun (_k, xs) -> List.length xs >= 2)
-    |> List.map (fun (k, xs) -> Module_ml.module_name_of_filename k, xs)
+    |> Ls.map (fun (k, xs) -> Module_ml.module_name_of_filename k, xs)
   in
 
   (* step1: creating the nodes and 'Has' edges, the defs *)
@@ -231,7 +231,7 @@ let build ?(verbose=true) root files =
       if readable =~ ".*external/" || readable =~ "web/.*" then ()
       else begin
         let ast = parse file in
-        extract_uses ~g ~ast ~readable ~dupes:(List.map fst duplicate_modules);
+        extract_uses ~g ~ast ~readable ~dupes:(Ls.map fst duplicate_modules);
       end
     ));
 

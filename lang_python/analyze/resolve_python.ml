@@ -107,7 +107,7 @@ let resolve prog =
         | CompIf _ -> None
       )
     in
-    let new_names = new_vars |> List.map (fun name ->
+    let new_names = new_vars |> Ls.map (fun name ->
       Ast.str_of_name name, Ast.LocalVar
     ) in
     with_added_env new_names env (fun () -> ke e);
@@ -179,7 +179,7 @@ let resolve prog =
                                  match x with
                                  | FunctionDef (_t, name, params, _typopt, _body, _decorators) ->
                                      let new_params = params_of_parameters (params: parameters) in
-                                     let new_names = new_params |> List.map (fun name ->
+                                     let new_names = new_params |> Ls.map (fun name ->
                                        Ast.str_of_name name, Ast.Parameter
                                      ) in
                                      with_added_env new_names env (fun () ->

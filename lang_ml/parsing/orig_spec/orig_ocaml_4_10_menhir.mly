@@ -357,7 +357,7 @@ let pat_of_label ~loc lbl =
 
 let mk_newtypes ~loc newtypes exp =
   let mkexp = mkexp ~loc in
-  List.fold_right (fun newtype exp -> mkexp (Pexp_newtype (newtype, exp)))
+  Ls.fold_right (fun newtype exp -> mkexp (Pexp_newtype (newtype, exp)))
     newtypes exp
 
 let wrap_type_annotation ~loc newtypes core_type body =
@@ -489,7 +489,7 @@ let addlb lbs lb =
 
 let val_of_let_bindings ~loc lbs =
   let bindings =
-    List.map
+    Ls.map
       (fun lb ->
          Vb.mk ~loc:lb.lb_loc ~attrs:lb.lb_attributes
            ~docs:(Lazy.force lb.lb_docs)
@@ -504,7 +504,7 @@ let val_of_let_bindings ~loc lbs =
 
 let expr_of_let_bindings ~loc lbs body =
   let bindings =
-    List.map
+    Ls.map
       (fun lb ->
          Vb.mk ~loc:lb.lb_loc ~attrs:lb.lb_attributes
            lb.lb_pattern lb.lb_expression)
@@ -515,7 +515,7 @@ let expr_of_let_bindings ~loc lbs body =
 
 let class_of_let_bindings ~loc lbs body =
   let bindings =
-    List.map
+    Ls.map
       (fun lb ->
          Vb.mk ~loc:lb.lb_loc ~attrs:lb.lb_attributes
            lb.lb_pattern lb.lb_expression)
@@ -557,7 +557,7 @@ let package_type_of_module_type pmty =
   match pmty with
   | {pmty_desc = Pmty_ident lid} -> (lid, [], pmty.pmty_attributes)
   | {pmty_desc = Pmty_with({pmty_desc = Pmty_ident lid}, cstrs)} ->
-      (lid, List.map map_cstr cstrs, pmty.pmty_attributes)
+      (lid, Ls.map map_cstr cstrs, pmty.pmty_attributes)
   | _ ->
       err pmty.pmty_loc
         "only module type identifier and 'with type' constraints are supported"

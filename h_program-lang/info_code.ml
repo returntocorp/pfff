@@ -42,12 +42,12 @@ let load file =
 (* old:
    let xs =
     Common.cat file
-    +> List.map (Str.global_replace (Str.regexp "#.*") "" )
-    +> List.map (Str.global_replace (Str.regexp "\\*+ -----.*") "" )
+    +> Ls.map (Str.global_replace (Str.regexp "#.*") "" )
+    +> Ls.map (Str.global_replace (Str.regexp "\\*+ -----.*") "" )
     +> Common.exclude Common.is_blank_string
    in
    let xxs = Common.split_list_regexp "^\\*+ " xs in
-   xxs +> List.map (fun (s, body) ->
+   xxs +> Ls.map (fun (s, body) ->
     if s =~ "^\\*+ \\([^ ]+\\)[ \t]*$"
     then
       let dir = Common.matched1 s in

@@ -394,11 +394,11 @@ let visit_def_name vtor dn =
 let rec visit_literal vtor l =
   visit vtor#visit_literal l begin function
     | Array star_lst ->
-        let lst' = map_preserve List.map (visit_star_expr vtor) star_lst in
+        let lst' = map_preserve Ls.map (visit_star_expr vtor) star_lst in
         if star_lst==lst' then l else Array lst'
 
     | Hash pair_lst ->
-        let lst' = map_preserve List.map
+        let lst' = map_preserve Ls.map
             (fun ((e1,e2) as pair) ->
                let e1' = visit_expr vtor e1 in
                let e2' = visit_expr vtor e2 in
@@ -424,7 +424,7 @@ and visit_lhs vtor (lhs:lhs) =
   visit vtor#visit_lhs lhs begin function
     | LId id -> LId (visit_id vtor id :> identifier)
     | LTup lhs_l ->
-        let lhs_l' = map_preserve List.map (visit_lhs vtor) lhs_l in
+        let lhs_l' = map_preserve Ls.map (visit_lhs vtor) lhs_l in
         if lhs_l == lhs_l' then lhs
         else LTup (lhs_l')
     | LStar id ->
@@ -442,14 +442,14 @@ let rec visit_tuple vtor tup =
   visit vtor#visit_tuple tup begin function
     | TE e -> TE (visit_expr vtor e : expr)
     | TTup lst ->
-        let lst' = map_preserve List.map (visit_tuple vtor) lst in
+        let lst' = map_preserve Ls.map (visit_tuple vtor) lst in
         if lst == lst' then tup
         else TTup (lst')
     | TStar ((TE e)) ->
         let e' = visit_expr vtor e in
         if e==e' then tup else (TStar (TE e') : tuple_expr)
     | TStar ((TTup lst)) ->
-        let lst' = map_preserve List.map (visit_tuple vtor) lst in
+        let lst' = map_preserve Ls.map (visit_tuple vtor) lst in
         if lst == lst' then tup
         else TStar ((TTup (lst')))
     | _ -> failwith "Impossible" (* TStar (`Star (TStar _) *)
@@ -502,7 +502,7 @@ let rec visit_stmt (vtor:cfg_visitor) stmt =
 
 and visit_stmt_children vtor stmt = match stmt.snode with
   | Seq sl ->
-      let sl' = map_preserve List.map (visit_stmt vtor) sl in
+      let sl' = map_preserve Ls.map (visit_stmt vtor) sl in
       if sl == sl' then stmt
       else update_stmt stmt (Seq sl')
 
@@ -515,14 +515,14 @@ and visit_stmt_children vtor stmt = match stmt.snode with
       let lhso' = map_opt_preserve (visit_lhs vtor) lhso in
       let targ' = map_opt_preserve (visit_expr vtor) mc.mc_target in
       let msg' = visit_msg_id vtor mc.mc_msg in
-      let args' = map_preserve List.map (visit_star_expr vtor) mc.mc_args in
+      let args' = map_preserve Ls.map (visit_star_expr vtor) mc.mc_args in
       let cb' = map_opt_preserve
           (fun cb -> match cb with
              | CB_Arg e ->
                  let e' = visit_expr vtor e in
                  if e == e' then cb else CB_Arg e'
              | CB_Block(formals,body) ->
-                 let formals' = map_preserve List.map
+                 let formals' = map_preserve Ls.map
                      (visit_block_param vtor) formals
                  in
                  let body' = visit_stmt vtor body in
@@ -539,7 +539,7 @@ and visit_stmt_children vtor stmt = match stmt.snode with
 
   | Yield(lhso, args) ->
       let lhso' = map_opt_preserve (visit_lhs vtor) lhso in
-      let args' = map_preserve List.map (visit_star_expr vtor) args in
+      let args' = map_preserve Ls.map (visit_star_expr vtor) args in
       if lhso == lhso' && args == args'
       then stmt else update_stmt stmt (Yield(lhso',args'))
 
@@ -550,7 +550,7 @@ and visit_stmt_children vtor stmt = match stmt.snode with
       then stmt else update_stmt stmt (I (Assign(lhs',rhs')))
 
   | For(blist,guard,body) ->
-      let blist' = map_preserve List.map (visit_block_param vtor) blist in
+      let blist' = map_preserve Ls.map (visit_block_param vtor) blist in
       let guard' = visit_expr vtor guard in
       let body' = visit_stmt vtor body in
       if guard == guard' && body == body' && blist == blist'
@@ -580,7 +580,7 @@ and visit_stmt_children vtor stmt = match stmt.snode with
   | Case c ->
       let guard' = visit_expr vtor c.case_guard in
       let whens' =
-        map_preserve List.map
+        map_preserve Ls.map
           (fun ((g,s) as w) ->
              let g' = visit_tuple vtor g in
              let s' = visit_stmt vtor s in
@@ -600,10 +600,10 @@ and visit_stmt_children vtor stmt = match stmt.snode with
       let else' = map_opt_preserve (visit_stmt vtor) e.exn_else in
       let ensure' = map_opt_preserve (visit_stmt vtor) e.exn_ensure in
       let rescue' =
-        map_preserve List.map
+        map_preserve Ls.map
           (fun resc ->
              let guards' =
-               map_preserve List.map (visit_rescue_guard vtor) resc.rescue_guards
+               map_preserve Ls.map (visit_rescue_guard vtor) resc.rescue_guards
              in
              let rbody' = visit_stmt vtor resc.rescue_body in
              if guards' == resc.rescue_guards && rbody'=resc.rescue_body
@@ -636,7 +636,7 @@ and visit_stmt_children vtor stmt = match stmt.snode with
 
   | D MethodDef(def_name, args, body) ->
       let def_name' = visit_def_name vtor def_name in
-      let args' = map_preserve List.map (visit_method_param vtor) args in
+      let args' = map_preserve Ls.map (visit_method_param vtor) args in
       let body' = visit_stmt vtor body in
       if def_name==def_name' && args==args' && body==body'
       then stmt
@@ -665,7 +665,7 @@ and visit_stmt_children vtor stmt = match stmt.snode with
       if tup_o == tup_o' then stmt else update_stmt stmt (Next tup_o')
 
   | D Undef msg_l ->
-      let msg_l' = map_preserve List.map (visit_msg_id vtor) msg_l in
+      let msg_l' = map_preserve Ls.map (visit_msg_id vtor) msg_l in
       if msg_l == msg_l' then stmt
       else update_stmt stmt (D (Undef msg_l'))
 
@@ -703,7 +703,7 @@ let rec locals_of_any_formal acc (p:any_formal) = match p with
   | B (Formal_block_id(Local, s)) -> StrSet.add s acc
   | B (Formal_block_id _) -> acc
   | B (Formal_tuple lst)  ->
-      let lst = lst |> List.map b_to_any in
+      let lst = lst |> Ls.map b_to_any in
       List.fold_left locals_of_any_formal acc (lst : any_formal list)
 
 class compute_locals_vtor seen_env =

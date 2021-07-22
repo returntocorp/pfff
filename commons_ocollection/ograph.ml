@@ -22,5 +22,5 @@ class virtual ['a] ograph =
     method virtual brothers: 'a -> 'a Oset.oset
 
     method mydebug: ('a * 'a list) list =
-      (o#nodes)#tolist |> List.map (fun a -> (a, (o#successors a)#tolist))
+      (o#nodes)#tolist |> Ls.map (fun a -> (a, (o#successors a)#tolist))
   end

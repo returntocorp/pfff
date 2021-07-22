@@ -324,10 +324,10 @@ let nb_nodes g = OG.nb_vertex g.og
 let nb_edges g = OG.nb_edges g.og
 
 let succ k g = OG.succ g.og (g |> vertex_of_key k)
-               |> List.map (fun k -> key_of_vertex k g)
+               |> Ls.map (fun k -> key_of_vertex k g)
 (* this seems slow on the version of ocamlgraph I currently have *)
 let pred k g  = OG.pred  g.og (g |> vertex_of_key k)
-                |> List.map (fun k -> key_of_vertex k g)
+                |> Ls.map (fun k -> key_of_vertex k g)
 
 let ivertex k g =
   let v = vertex_of_key k g in
@@ -356,7 +356,7 @@ let entry_nodes2 g =
       Common.push v res;
     end
   );
-  !res |> List.map (fun i -> key_of_vertex i g) |> List.rev
+  !res |> Ls.map (fun i -> key_of_vertex i g) |> List.rev
 
 
 let entry_nodes a =
@@ -438,9 +438,9 @@ let shortest_path k1 k2 g =
 
   let (edges, _len) = OG.shortest_path g.og vx vy in
   let vertexes =
-    vx::(edges |> List.map (fun edge -> OG.E.dst edge))
+    vx::(edges |> Ls.map (fun edge -> OG.E.dst edge))
   in
-  vertexes |> List.map (fun v -> key_of_vertex v g)
+  vertexes |> Ls.map (fun v -> key_of_vertex v g)
 
 
 (* todo? this works? I get some
@@ -485,7 +485,7 @@ let mirror g =
 let strongly_connected_components2 g =
   let scc_array_vt = OG.Components.scc_array g.og in
   let scc_array =
-    scc_array_vt |> Array.map (fun xs -> xs |> List.map (fun vt ->
+    scc_array_vt |> Array.map (fun xs -> xs |> Ls.map (fun vt ->
       key_of_vertex vt g
     ))
   in

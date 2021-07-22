@@ -493,9 +493,9 @@ let special x = "__special__" ^ x
 let has_modifier cv =
   List.length cv.cv_modifiers > 0
 let is_static modifiers  =
-  List.mem Cst_php.Static  (List.map unwrap modifiers)
+  List.mem Cst_php.Static  (Ls.map unwrap modifiers)
 let is_private modifiers =
-  List.mem Cst_php.Private (List.map unwrap modifiers)
+  List.mem Cst_php.Private (Ls.map unwrap modifiers)
 
 let string_of_xhp_tag xs = ":" ^ Common.join ":" xs
 

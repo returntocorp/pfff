@@ -239,7 +239,7 @@ let map_reduce ?timeout ~fmap:map_ex ~freduce:reduce_ex acc xs =
   end
   else
     let not_done = [] in
-    List.fold_left reduce_ex acc (List.map map_ex xs), not_done
+    List.fold_left reduce_ex acc (Ls.map map_ex xs), not_done
 (*e: map_reduce *)
 
 (*s: map_reduce_lazy *)
@@ -260,7 +260,7 @@ let map_reduce_lazy ?timeout ~fmap:map_ex ~freduce:reduce_ex acc fxs =
   else
     let xs = fxs() in (* changed code *)
     let not_done = [] in
-    List.fold_left reduce_ex acc (List.map map_ex xs), not_done
+    List.fold_left reduce_ex acc (Ls.map map_ex xs), not_done
 
 (*e: map_reduce_lazy *)
 

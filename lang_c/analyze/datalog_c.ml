@@ -184,7 +184,7 @@ let instrs_of_expr env e =
 
     (* todo: actually an alloc is hidden there! *)
     | A.Assign (op, e1, A.ArrayInit xs) ->
-        let ys = xs |> unbracket |> List.map (fun (idxopt, value) ->
+        let ys = xs |> unbracket |> Ls.map (fun (idxopt, value) ->
           (* less? recompute e1 each time? should store in intermediate val? *)
           let tok =
             match op with A2.SimpleAssign tok -> tok | A2.OpAssign (_, tok) -> tok
@@ -202,7 +202,7 @@ let instrs_of_expr env e =
 
     (* todo: actually an alloc is hidden there! *)
     | A.Assign (op, e1, A.RecordInit xs) ->
-        let ys = xs |> unbracket |> List.map (fun (name, value) ->
+        let ys = xs |> unbracket |> Ls.map (fun (name, value) ->
           let tok =
             match op with A2.SimpleAssign tok -> tok | A2.OpAssign (_, tok) -> tok
           in
@@ -325,7 +325,7 @@ let instrs_of_expr env e =
         )
 
     | A.Call (e, (_, es, _)) ->
-        let vs = List.map var_of_arg es in
+        let vs = Ls.map var_of_arg es in
         (match e with
          | A.Id name ->
              if is_local env (fst name)
@@ -356,7 +356,7 @@ let instrs_of_expr env e =
              raise Todo
         )
     | A.Binary (e1, (_op, tok), e2) ->
-        let vs = List.map var_of_expr [e1; e2] in
+        let vs = Ls.map var_of_expr [e1; e2] in
         BuiltinCall (("_builtin_" ^ (string_of_op tok), tok), vs)
     | A.Unary (e, ((A2.UnPlus|A2.UnMinus|A2.Tilde|A2.Not), tok)) ->
         let vs = [var_of_expr e] in
@@ -446,7 +446,7 @@ let var_of_global env name =
          spf "%s#%s" file s
      | x::y::xs ->
          pr2 (spf "Conflicting entities for %s [%s]"
-                s ((x::y::xs) |> List.map G.string_of_node |>
+                s ((x::y::xs) |> Ls.map G.string_of_node |>
                    Common.join ","));
          let file = G.file_of_node x env.globals in
          spf "%s#%s" file s
@@ -545,7 +545,7 @@ let facts_of_instr env = function
        | DynamicCall (name, args)
        | BuiltinCall(name, args)  ->
            let invoke = invoke_loc_of_name env name in
-           (args |> Common.index_list_1 |> List.map (fun (v, i) ->
+           (args |> Common.index_list_1 |> Ls.map (fun (v, i) ->
               D.Argument(invoke, i, var_of_name env v)
             )) @
            [D.ReturnValue (invoke, dest)] @
@@ -653,7 +653,7 @@ and facts_of_definition env def =
 
   | EnumDef def ->
       let { e_name = _name; e_consts = xs } = def in
-      xs |> List.map (fun (name, _eopt) ->
+      xs |> Ls.map (fun (name, _eopt) ->
         D.PointTo (var_of_global env name, heap_of_cst env name)
       )
   | FuncDef def ->

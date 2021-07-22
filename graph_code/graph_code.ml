@@ -364,7 +364,7 @@ let rec node_and_all_children n g =
   if null xs
   then [n]
   else
-    n::(xs |> List.map (fun n -> node_and_all_children n g) |> List.flatten)
+    n::(xs |> Ls.map (fun n -> node_and_all_children n g) |> Ls.flatten)
 
 
 
@@ -488,7 +488,7 @@ let remove_empty_nodes g xs =
   )
 
 let basename_to_readable_disambiguator xs ~root =
-  let xs = xs |> List.map (Common.readable ~root) in
+  let xs = xs |> Ls.map (Common.readable ~root) in
   (* use the Hashtbl.find_all property of this hash *)
   let h = Hashtbl.create 101 in
   xs |> List.iter (fun file ->
@@ -505,9 +505,9 @@ let basename_to_readable_disambiguator xs ~root =
 let group_edges_by_files_edges xs g =
   xs |> Common2.group_by_mapped_key (fun (n1, n2) ->
     (file_of_node n1 g, file_of_node n2 g)
-  ) |> List.map (fun (x, deps) -> List.length deps, (x, deps))
+  ) |> Ls.map (fun (x, deps) -> List.length deps, (x, deps))
   |> Common.sort_by_key_highfirst
-  |> List.map snd
+  |> Ls.map snd
 
 (*****************************************************************************)
 (* Graph algorithms *)
@@ -556,7 +556,7 @@ let load_adjust file =
   |> Common.exclude (fun s ->
     s =~ "#.*" || s =~ "^[ \t]*$"
   )
-  |> List.map (fun s ->
+  |> Ls.map (fun s ->
     match s with
     | _ when s =~ "\\([^ ]+\\)[ ]+->[ ]*\\([^ ]+\\)" ->
         Common.matched2 s
@@ -565,7 +565,7 @@ let load_adjust file =
 
 let load_whitelist file =
   Common.cat file |>
-  List.map (fun s ->
+  Ls.map (fun s ->
     if s =~ "\\(.*\\) --> \\(.*\\) "
     then
       let (s1, s2) = Common.matched2 s in

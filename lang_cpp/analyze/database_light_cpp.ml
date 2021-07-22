@@ -74,12 +74,12 @@ let compute_database ?(verbose=false) files_or_dirs =
    * like PHP, the other database may use realpath for the path of the files
    * so we want to behave the same.
   *)
-  let files_or_dirs = files_or_dirs |> List.map Common.fullpath in
+  let files_or_dirs = files_or_dirs |> Ls.map Common.fullpath in
   let root = Common2.common_prefix_of_files_or_dirs files_or_dirs in
   pr2 (spf "generating C/C++ db_light with root = %s" root);
 
   let files = Lib_parsing_cpp.find_source_files_of_dir_or_files files_or_dirs in
-  let dirs = files |> List.map Filename.dirname |> Common2.uniq_eff in
+  let dirs = files |> Ls.map Filename.dirname |> Common2.uniq_eff in
 
   (* step1: collecting definitions *)
   if verbose then pr2 "phase 1: collecting definitions";
@@ -171,16 +171,16 @@ let compute_database ?(verbose=false) files_or_dirs =
   (* step3: adding cross reference information *)
   if verbose then pr2 "\nphase 3: last fixes";
 
-  let entities_arr = Common.hash_to_list hdefs |> List.map snd |> Array.of_list
+  let entities_arr = Common.hash_to_list hdefs |> Ls.map snd |> Array.of_list
   in
   Db.adjust_method_or_field_external_users ~verbose entities_arr;
 
-  let dirs = dirs |> List.map (fun s -> Common.readable ~root s) in
+  let dirs = dirs |> Ls.map (fun s -> Common.readable ~root s) in
   let dirs = Db.alldirs_and_parent_dirs_of_relative_dirs dirs in
 
   { Db.
     root = root;
-    dirs = dirs |> List.map (fun d -> d, 0); (* TODO *)
-    files = files |> List.map (fun f -> Common.readable ~root f, 0); (* TODO *)
+    dirs = dirs |> Ls.map (fun d -> d, 0); (* TODO *)
+    files = files |> Ls.map (fun f -> Common.readable ~root f, 0); (* TODO *)
     entities = entities_arr;
   }

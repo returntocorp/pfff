@@ -911,7 +911,7 @@ let emacs_gray_colors = [
 
 let emacs_colors =
   (emacs_basic_colors @ emacs_degrade_colors @ emacs_gray_colors)
-  |> List.map (fun (s, a) -> String.lowercase_ascii s, a)
+  |> Ls.map (fun (s, a) -> String.lowercase_ascii s, a)
 
 let random_emacs_color xs =
   let len = List.length xs in
@@ -946,7 +946,7 @@ let string_of_color color =
     abs_float (c1 -. c2) +.
     0.0
   in
-  let dists = emacs_colors |> List.map (fun (s, rgbf2) ->
+  let dists = emacs_colors |> Ls.map (fun (s, rgbf2) ->
     (s, dist rgbf rgbf2)
   )
   in

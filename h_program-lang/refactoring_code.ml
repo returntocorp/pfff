@@ -51,7 +51,7 @@ type refactoring = refactoring_kind * position option
 
 (* format: file;RETURN;line;col;value *)
 let load file =
-  Common.cat file |> List.map (fun s ->
+  Common.cat file |> Ls.map (fun s ->
     let xs = Common.split ";" s in
     match xs with
     | [file;action;line;col;value] when

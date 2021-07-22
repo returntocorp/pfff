@@ -17,7 +17,7 @@ class virtual ['a,'b] oassoc =
 
   (*
     method keys =
-    List.map fst (o#tolist)
+    Ls.map fst (o#tolist)
   *)
     method virtual keys: 'a list (* or 'a oset ? *)
 

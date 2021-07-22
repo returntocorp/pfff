@@ -99,10 +99,10 @@ let defs_of_graph_code ?(verbose=false) g =
        )
     )
   );
-  Common2.hkeys hfile_to_tags |> List.map (fun file ->
+  Common2.hkeys hfile_to_tags |> Ls.map (fun file ->
     file,
     Hashtbl.find_all hfile_to_tags file
-    |> List.map (fun tag -> tag.Tags_file.byte_offset, tag)
+    |> Ls.map (fun tag -> tag.Tags_file.byte_offset, tag)
     |> Common.sort_by_key_lowfirst
-    |> List.map snd
+    |> Ls.map snd
   )

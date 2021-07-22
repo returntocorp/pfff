@@ -39,7 +39,7 @@ let unittest =
         let root = Filename.concat Config_pfff.path_pfff_home "lang_ml" in
         let cover' =
           Coverage_ml.basename_coverage_to_readable_coverage cover root
-          |> List.map fst
+          |> Ls.map fst
         in
         assert_equal
           ~msg:"it should map basename'd files to readable paths"

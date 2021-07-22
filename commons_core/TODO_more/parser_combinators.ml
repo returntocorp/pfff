@@ -117,14 +117,14 @@ let alphanum_under_minus c = digit c || alpha c || (c = '-') || (c = '_')
 
 let (|>) o f = f o
 let string_of_chars cs =
-  cs |> List.map (String.make 1) |> String.concat ""
+  cs |> Ls.map (String.make 1) |> String.concat ""
 
 
 let collect(h, t) =
-  String.concat "" (List.map (String.make 1) (h::t))
+  String.concat "" (Ls.map (String.make 1) (h::t))
 
 let collectbis(xs) =
-  String.concat "" (List.map (String.make 1) (xs))
+  String.concat "" (Ls.map (String.make 1) (xs))
 
 let list_of_string string =
   let list = ref [] in

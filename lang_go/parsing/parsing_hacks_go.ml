@@ -111,7 +111,7 @@ let fix_tokens_lbody toks =
                                          kind = TH.token_kind_of_tok;
                                        } toks
     in
-    let horigin = toks |> List.map (fun t -> TH.info_of_tok t, t)
+    let horigin = toks |> Ls.map (fun t -> TH.info_of_tok t, t)
                   |> Common.hash_of_list in
 
     let retag_lbrace = Hashtbl.create 101 in
@@ -218,7 +218,7 @@ let fix_tokens_lbody toks =
     aux Normal trees;
 
     (* use the tagged information and transform tokens *)
-    toks |> List.map (function
+    toks |> Ls.map (function
       | T.LBRACE info when Hashtbl.mem retag_lbrace info ->
           T.LBODY info
       | T.LBRACE info when Hashtbl.mem retag_lbrace info ->

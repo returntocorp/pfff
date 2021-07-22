@@ -50,7 +50,7 @@ let load file =
   |> Common.exclude (fun s ->
     s =~ "#.*" || s =~ "^[ \t]*$"
   )
-  |> List.map (fun s ->
+  |> Ls.map (fun s ->
     match s with
     | _ when s =~ "^dir:[ ]*\\([^ ]+\\)" ->
         Dir (Common.matched1 s)

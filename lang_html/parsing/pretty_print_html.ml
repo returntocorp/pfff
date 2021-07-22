@@ -31,13 +31,13 @@ let string_of_html_tree tree =
       let rec aux x =
         match x with
         | Element ((Tag (stag, _), attrs, xs)) ->
-            let subs = xs |> List.map aux |> Common.join "" in
+            let subs = xs |> Ls.map aux |> Common.join "" in
             let start_tag =
               match attrs with
               | [] -> spf "<%s>" stag
               | _ ->
                   spf "<%s %s>" stag
-                    (attrs |> List.map (fun ((Attr (sattr,_)), (Val (sval,_)))->
+                    (attrs |> Ls.map (fun ((Attr (sattr,_)), (Val (sval,_)))->
                        spf "%s=%s" sattr sval
                      ) |> Common.join " "
                     )
@@ -46,5 +46,5 @@ let string_of_html_tree tree =
             start_tag ^ subs ^ end_tag
         | Data (s, _) -> s
       in
-      xs |> List.map aux |> Common.join ""
+      xs |> Ls.map aux |> Common.join ""
   | _ -> failwith "no root node"

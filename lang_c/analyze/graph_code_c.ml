@@ -229,7 +229,7 @@ let rec expand_typedefs env t =
   | TArray (eopt, x) -> TArray (eopt, expand_typedefs env x)
   | TFunction (ret, params) ->
       TFunction (expand_typedefs env ret,
-                 params |> List.map (function
+                 params |> Ls.map (function
                    | ParamClassic p ->
                        ParamClassic { p with p_type = expand_typedefs env p.p_type }
                    | ParamDots t -> ParamDots t
@@ -538,7 +538,7 @@ and directive env x =
       let env = add_node_and_edge_if_defs_mode env (name, E.Macro) None in
       hook_def env (DirStmt x);
       let env = { env with locals = ref
-                               (params |> List.map (fun p -> Ast.str_of_name p, None(*TAny*)))
+                               (params |> Ls.map (fun p -> Ast.str_of_name p, None(*TAny*)))
                 } in
       if env.phase = Uses && env.conf.macro_dependencies
       then Common.do_option (define_body env) body
@@ -923,7 +923,7 @@ and expr env = function
         expr env init
       )
   (* todo: add deps on field *)
-  | RecordInit xs -> xs |> unbracket |> List.map snd |> exprs env
+  | RecordInit xs -> xs |> unbracket |> Ls.map snd |> exprs env
 
   | SizeOf (_, x) ->
       (match x with
@@ -1077,7 +1077,7 @@ let build ?(verbose=true) root files =
   *)
   let elems =
     files |> Console.progress ~show:verbose (fun k ->
-      List.map (fun file ->
+      Ls.map (fun file ->
         k();
         let ast = parse ~show_parse_error:true file in
         let readable = Common.readable ~root file in

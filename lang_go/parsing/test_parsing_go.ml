@@ -21,7 +21,7 @@ let test_tokens_go file =
   ()
 
 let test_parse_go xs =
-  let xs = List.map Common.fullpath xs in
+  let xs = Ls.map Common.fullpath xs in
 
   let fullxs =
     Lib_parsing_go.find_source_files_of_dir_or_files xs

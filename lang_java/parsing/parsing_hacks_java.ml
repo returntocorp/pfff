@@ -187,7 +187,7 @@ let fix_tokens_fuzzy toks =
     aux () trees;
 
     (* use the tagged information and transform tokens *)
-    toks |> List.map (function
+    toks |> Ls.map (function
       | T.LP info when Hashtbl.mem retag_lparen info ->
           T.LP_LAMBDA info
       | T.DEFAULT info when Hashtbl.mem retag_default info ->
